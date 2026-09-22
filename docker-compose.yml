@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: evo-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - ORDER_SERVICE_URL=http://order-service:8001
+      - INVENTORY_SERVICE_URL=http://inventory-service:8002
+    depends_on:
+      - order-service
+      - inventory-service
+    networks:
+      - evonet
+
+  order-service:
+    build:
+      context: ./services/order-service
+      dockerfile: Dockerfile
+    container_name: evo-order-service
+    ports:
+      - "8001:8001"
+    environment:
+      - INVENTORY_SERVICE_URL=http://inventory-service:8002
+      - PAYMENT_SERVICE_URL=http://payment-service:8003
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8004
+    depends_on:
+      - inventory-service
+      - payment-service
+      - notification-service
+    networks:
+      - evonet
+
+  inventory-service:
+    build:
+      context: ./services/inventory-service
+      dockerfile: Dockerfile
+    container_name: evo-inventory-service
+    ports:
+      - "8002:8002"
+    networks:
+      - evonet
+
+  payment-service:
+    build:
+      context: ./services/payment-service
+      dockerfile: Dockerfile
+    container_name: evo-payment-service
+    ports:
+      - "8003:8003"
+    networks:
+      - evonet
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    container_name: evo-notification-service
+    ports:
+      - "8004:8004"
+    networks:
+      - evonet
+
+networks:
+  evonet:
+    driver: bridge
