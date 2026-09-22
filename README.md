@@ -425,7 +425,48 @@ The AI system must interact with the platform using real tools such as:
 - propose_remediation
 - execute_remediation
 
-This tool-driven pattern is essential. The goal is not to make the system sound smart in the abstract; the goal is to make it gather evidence, validate assumptions, and act on grounded information.
+---
+
+## Model Context Protocol (MCP) Integration Layer
+
+Starting in **Phase 9**, EvoOps exposes its investigation and remediation toolset through a standardized **Model Context Protocol (MCP)** server (built using FastMCP / Python MCP SDK).
+
+```text
+┌──────────────────────────────────────────────┐
+│        EvoOps Investigation Agent            │
+│          (LangGraph Orchestrator)            │
+└──────────────────────┬───────────────────────┘
+                       │
+                       │ Model Context Protocol (JSON-RPC)
+                       ▼
+┌──────────────────────────────────────────────┐
+│           EvoOps SRE MCP Server              │
+├──────────────────────────────────────────────┤
+│ Read-Only Tools (Auto-approved):             │
+│   • query_metrics(promql)       [Prometheus] │
+│   • search_logs(query, window)  [Loki]       │
+│   • get_trace(trace_id)         [Tempo]      │
+│   • check_service_health()      [Gateway]    │
+│   • inspect_git_commit(hash)    [Git]        │
+│   • search_runbooks(topic)      [Docs]       │
+│                                              │
+│ Action Tools (Policy & Guardrails):          │
+│   • restart_service(service)    [Approval]   │
+│   • rollback_deployment(rev)    [Approval]   │
+│   • scale_service(replicas)     [Approval]   │
+└──────────────────────────────────────────────┘
+                       │
+                       ▼
+┌──────────────────────────────────────────────┐
+│    EvoCommerce & Observability Subsystems    │
+└──────────────────────────────────────────────┘
+```
+
+### Why MCP in EvoOps?
+
+1. **Protocol Standard:** Adopts the open industry standard for AI tool execution, allowing any MCP-compliant AI host or client (LangGraph, Claude, Antigravity, Cursor) to connect to EvoOps infrastructure seamlessly.
+2. **Access Gateway & Security Perimeter:** The MCP server serves as the authorization barrier between reasoning LLMs and production infrastructure. Read-only diagnostic tools execute immediately, while disruptive actions require Human-in-the-Loop approval.
+3. **Enterprise Portability:** Tools are decoupled from any specific LLM framework; the same observability tools can be invoked across various agent architectures.
 
 ---
 
@@ -1119,7 +1160,7 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 6 | Grafana dashboards | Not Started | Unified observability visualization |
 | 7 | Incident Simulator | Not Started | Controlled fault-injection engine for reproducible incidents |
 | 8 | Incident Scenarios | Not Started | 10 known operational incident scenarios with ground truth |
-| 9 | EvoOps Single Agent | Not Started | Investigation agent with tool calling capabilities |
+| 9 | EvoOps Single Agent + MCP Server | Not Started | Investigation agent powered by FastMCP SRE tool server |
 | 10 | LangGraph Orchestration | Not Started | State machine & cyclic investigation workflows |
 | 11 | Specialized Agents | Not Started | Multi-agent collaboration (Metrics, Logs, Traces, Supervisor) |
 | 12 | Memory Architecture | Not Started | Episodic, semantic, and procedural memory stores |
