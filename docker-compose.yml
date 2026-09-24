@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: evo-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: evo_user
+      POSTGRES_PASSWORD: evo_password
+      POSTGRES_DB: evo_orders_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - evonet
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U evo_user -d evo_orders_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -28,10 +48,23 @@ services:
       - INVENTORY_SERVICE_URL=http://inventory-service:8002
       - PAYMENT_SERVICE_URL=http://payment-service:8003
       - NOTIFICATION_SERVICE_URL=http://notification-service:8004
+      - DATABASE_URL=postgresql://evo_user:evo_password@postgres:5432/evo_orders_db
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+
+
     depends_on:
-      - inventory-service
-      - payment-service
-      - notification-service
+      postgres:
+        condition: service_healthy
+      inventory-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+
     networks:
       - evonet
 
@@ -42,6 +75,11 @@ services:
     container_name: evo-inventory-service
     ports:
       - "8002:8002"
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
     networks:
       - evonet
 
@@ -62,8 +100,45 @@ services:
     container_name: evo-notification-service
     ports:
       - "8004:8004"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - evonet
+
+    
+  redis:
+    image: redis:7-alpine
+    container_name: evo-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - evonet
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: evo-rabbitmq
+    ports:
+      - "5672:5672"    # AMQP message broker port
+      - "15672:15672"  # Web UI Dashboard port
+    networks:
+      - evonet
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+   
+volumes:
+  postgres_data:
 
 networks:
   evonet:

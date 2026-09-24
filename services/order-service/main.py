@@ -1,12 +1,52 @@
 import os
 import uuid
+import json
+import pika
 import httpx
-from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from logger import get_logger
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.orm import Session
+from database import init_db, get_db, OrderModel
+
+
+RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+
+def publish_order_notification(notification_data: dict):
+    """Publish an order notification event to RabbitMQ queue."""
+    try:
+        params = pika.URLParameters(RABBITMQ_URL)
+        connection = pika.BlockingConnection(params)
+        channel = connection.channel()
+        
+        # Declare durable queue so messages survive broker restarts
+        channel.queue_declare(queue="order_notifications", durable=True)
+        
+        channel.basic_publish(
+            exchange="",
+            routing_key="order_notifications",
+            body=json.dumps(notification_data),
+            properties=pika.BasicProperties(delivery_mode=2),  # Persistent message
+        )
+        connection.close()
+        logger.info("Published notification event to RabbitMQ", extra={"order_id": notification_data.get("order_id")})
+        return True
+    except Exception as exc:
+        logger.warning(f"Failed to publish notification event to RabbitMQ: {exc}", extra={"order_id": notification_data.get("order_id")})
+        return False
+
 
 app = FastAPI(title="Order Service")
 logger = get_logger("order-service")
+
+@app.on_event("startup")
+def on_startup():
+    try:
+        init_db()
+        logger.info("PostgreSQL database tables initialized successfully")
+    except Exception as exc:
+        logger.error(f"Failed to initialize database: {exc}")
+
 
 # Service URLs (configurable via environment variables)
 INVENTORY_SERVICE_URL = os.getenv("INVENTORY_SERVICE_URL", "http://localhost:8002")
@@ -14,7 +54,7 @@ PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL", "http://localhost:8003")
 NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://localhost:8004")
 
 # In-memory order store for Phase 1
-ORDERS_DB = {}
+# ORDERS_DB = {}
 
 
 class CreateOrderRequest(BaseModel):
@@ -40,14 +80,24 @@ async def health():
 
 
 @app.get("/orders/{order_id}")
-async def get_order(order_id: str):
-    if order_id not in ORDERS_DB:
+async def get_order(order_id: str, db: Session = Depends(get_db)):
+    order = db.query(OrderModel).filter(OrderModel.order_id == order_id).first()
+    if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    return ORDERS_DB[order_id]
+    return {
+        "order_id": order.order_id,
+        "user_id": order.user_id,
+        "product_id": order.product_id,
+        "quantity": order.quantity,
+        "amount": order.amount,
+        "status": order.status,
+        "details": order.details,
+    }
+
 
 
 @app.post("/orders", response_model=OrderResponse)
-async def create_order(request: CreateOrderRequest):
+async def create_order(request: CreateOrderRequest, db: Session = Depends(get_db)):
     order_id = str(uuid.uuid4())
     logger.info(
         "Creating new order",
@@ -99,41 +149,44 @@ async def create_order(request: CreateOrderRequest):
             logger.error(f"Cannot reach payment service: {exc}", extra={"order_id": order_id})
             raise HTTPException(status_code=503, detail="Payment service unreachable")
 
-        # Step 3: Trigger Notification (best-effort async event)
-        notification_status = "pending"
-        try:
-            notif_resp = await client.post(
-                f"{NOTIFICATION_SERVICE_URL}/notify",
-                json={
-                    "order_id": order_id,
-                    "user_id": request.user_id,
-                    "message": f"Order {order_id} placed successfully!",
-                },
-            )
-            if notif_resp.status_code == 200:
-                notification_status = "delivered"
-        except httpx.RequestError as exc:
-            logger.warning(f"Notification service could not be reached: {exc}", extra={"order_id": order_id})
-            notification_status = "failed"
+        # Step 3: Publish Notification Event to RabbitMQ (Asynchronous & Decoupled)
+        notif_payload = {
+            "order_id": order_id,
+            "user_id": request.user_id,
+            "message": f"Order {order_id} placed successfully!",
+        }
+        published = publish_order_notification(notif_payload)
+        notification_status = "queued" if published else "publish_failed"
 
-    # Save to memory
-    order_record = {
-        "order_id": order_id,
-        "user_id": request.user_id,
-        "product_id": request.product_id,
-        "quantity": request.quantity,
-        "amount": request.amount,
-        "status": "completed",
-        "details": {
+
+    # Save to PostgreSQL
+    new_order = OrderModel(
+        order_id=order_id,
+        user_id=request.user_id,
+        product_id=request.product_id,
+        quantity=request.quantity,
+        amount=request.amount,
+        status="completed",
+        details={
             "payment_id": payment_data.get("payment_id"),
             "notification": notification_status,
         },
-    }
-    ORDERS_DB[order_id] = order_record
+    )
+    db.add(new_order)
+    db.commit()
+    db.refresh(new_order)
 
     logger.info(
-        "Order completed successfully",
+        "Order persisted to database successfully",
         extra={"order_id": order_id, "status": "completed"},
     )
 
-    return OrderResponse(**order_record)
+    return OrderResponse(
+        order_id=new_order.order_id,
+        user_id=new_order.user_id,
+        product_id=new_order.product_id,
+        quantity=new_order.quantity,
+        amount=new_order.amount,
+        status=new_order.status,
+        details=new_order.details,
+    )

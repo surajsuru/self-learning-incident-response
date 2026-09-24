@@ -3,3 +3,4 @@ uvicorn
 httpx
 pydantic
 python-json-logger
+redis
