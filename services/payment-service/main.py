@@ -3,9 +3,11 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from logger import get_logger
 from tracer import setup_tracer
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="Payment Service")
 tracer = setup_tracer("payment-service", app)
+Instrumentator().instrument(app).expose(app)
 logger = get_logger("payment-service")
 
 

@@ -8,9 +8,11 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from logger import get_logger
 from tracer import setup_tracer
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="Notification Service")
 tracer = setup_tracer("notification-service", app)
+Instrumentator().instrument(app).expose(app)
 logger = get_logger("notification-service")
 
 RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")

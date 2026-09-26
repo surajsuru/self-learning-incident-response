@@ -4,10 +4,13 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from logger import get_logger
 from tracer import setup_tracer
+from prometheus_fastapi_instrumentator import Instrumentator
+
 
 
 app = FastAPI(title="API Gateway")
 tracer = setup_tracer("api-gateway", app)
+Instrumentator().instrument(app).expose(app)
 logger = get_logger("api-gateway")
 
 ORDER_SERVICE_URL = os.getenv("ORDER_SERVICE_URL", "http://localhost:8001")

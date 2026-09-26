@@ -1156,7 +1156,7 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 2 | **Dockerize services** | **Completed** | Containerized all 5 services with Dockerfiles & Docker Compose on evonet |
 | 3 | **PostgreSQL + Redis + RabbitMQ** | **Completed** | State persistence in PostgreSQL, Redis cache-aside, and async messaging with RabbitMQ |
 | 4 | **OpenTelemetry** | **Completed** | Distributed tracing with OpenTelemetry SDK & Jaeger waterfall visualization across all 5 services |
-| 5 | Metrics + Logs + Traces | Not Started | Prometheus, structured Loki logs, and Tempo tracing backend |
+| 5 | **Metrics + Logs + Traces** | **Completed** | Prometheus metrics scraping, trace-log correlation with trace_id/span_id, and log endpoint filtering |
 | 6 | Grafana dashboards | Not Started | Unified observability visualization |
 | 7 | Incident Simulator | Not Started | Controlled fault-injection engine for reproducible incidents |
 | 8 | Incident Scenarios | Not Started | 10 known operational incident scenarios with ground truth |

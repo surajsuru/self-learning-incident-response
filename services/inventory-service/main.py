@@ -4,9 +4,11 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from logger import get_logger
 from tracer import setup_tracer
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="Inventory Service")
 tracer = setup_tracer("inventory-service", app)
+Instrumentator().instrument(app).expose(app)
 logger = get_logger("inventory-service")
 
 # Redis connection
