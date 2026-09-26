@@ -5,8 +5,10 @@ from pydantic import BaseModel
 from logger import get_logger
 from tracer import setup_tracer
 from prometheus_fastapi_instrumentator import Instrumentator
+from chaos import setup_chaos
 
 app = FastAPI(title="Inventory Service")
+setup_chaos(app)
 tracer = setup_tracer("inventory-service", app)
 Instrumentator().instrument(app).expose(app)
 logger = get_logger("inventory-service")

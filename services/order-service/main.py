@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from logger import get_logger
 from tracer import setup_tracer
 from prometheus_fastapi_instrumentator import Instrumentator
+from chaos import setup_chaos
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import init_db, get_db, OrderModel
@@ -39,6 +40,7 @@ def publish_order_notification(notification_data: dict):
 
 
 app = FastAPI(title="Order Service")
+setup_chaos(app)
 tracer = setup_tracer("order-service", app)
 Instrumentator().instrument(app).expose(app)
 logger = get_logger("order-service")
