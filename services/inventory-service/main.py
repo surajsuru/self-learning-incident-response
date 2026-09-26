@@ -3,8 +3,10 @@ import redis
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from logger import get_logger
+from tracer import setup_tracer
 
 app = FastAPI(title="Inventory Service")
+tracer = setup_tracer("inventory-service", app)
 logger = get_logger("inventory-service")
 
 # Redis connection

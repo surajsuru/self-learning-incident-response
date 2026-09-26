@@ -31,6 +31,8 @@ services:
     environment:
       - ORDER_SERVICE_URL=http://order-service:8001
       - INVENTORY_SERVICE_URL=http://inventory-service:8002
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+
     depends_on:
       - order-service
       - inventory-service
@@ -48,9 +50,9 @@ services:
       - INVENTORY_SERVICE_URL=http://inventory-service:8002
       - PAYMENT_SERVICE_URL=http://payment-service:8003
       - NOTIFICATION_SERVICE_URL=http://notification-service:8004
-      - DATABASE_URL=postgresql://evo_user:evo_password@postgres:5432/evo_orders_db
+      - DATABASE_URL=postgresql+psycopg2://evo_user:evo_password@postgres:5432/evo_orders_db
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
-
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
 
     depends_on:
       postgres:
@@ -64,7 +66,6 @@ services:
       rabbitmq:
         condition: service_healthy
 
-
     networks:
       - evonet
 
@@ -77,6 +78,7 @@ services:
       - "8002:8002"
     environment:
       - REDIS_URL=redis://redis:6379
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
     depends_on:
       redis:
         condition: service_healthy
@@ -90,6 +92,9 @@ services:
     container_name: evo-payment-service
     ports:
       - "8003:8003"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+
     networks:
       - evonet
 
@@ -102,13 +107,14 @@ services:
       - "8004:8004"
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+
     depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
       - evonet
 
-    
   redis:
     image: redis:7-alpine
     container_name: evo-redis
@@ -117,26 +123,37 @@ services:
     networks:
       - evonet
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
-    
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: evo-rabbitmq
     ports:
-      - "5672:5672"    # AMQP message broker port
-      - "15672:15672"  # Web UI Dashboard port
+      - "5672:5672" # AMQP message broker port
+      - "15672:15672" # Web UI Dashboard port
     networks:
       - evonet
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-   
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: evo-jaeger
+    ports:
+      - "16686:16686" # Web UI (Search & view traces)
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - evonet
+
 volumes:
   postgres_data:
 

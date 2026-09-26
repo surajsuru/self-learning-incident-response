@@ -5,6 +5,7 @@ import pika
 import httpx
 from pydantic import BaseModel, Field
 from logger import get_logger
+from tracer import setup_tracer
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from database import init_db, get_db, OrderModel
@@ -37,6 +38,7 @@ def publish_order_notification(notification_data: dict):
 
 
 app = FastAPI(title="Order Service")
+tracer = setup_tracer("order-service", app)
 logger = get_logger("order-service")
 
 @app.on_event("startup")

@@ -1155,7 +1155,7 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 1 | **Build EvoCommerce backend** | **Completed** | 5 distributed FastAPI microservices communicating over HTTP |
 | 2 | **Dockerize services** | **Completed** | Containerized all 5 services with Dockerfiles & Docker Compose on evonet |
 | 3 | **PostgreSQL + Redis + RabbitMQ** | **Completed** | State persistence in PostgreSQL, Redis cache-aside, and async messaging with RabbitMQ |
-| 4 | OpenTelemetry | Not Started | Auto & manual instrumentation for traces and metrics |
+| 4 | **OpenTelemetry** | **Completed** | Distributed tracing with OpenTelemetry SDK & Jaeger waterfall visualization across all 5 services |
 | 5 | Metrics + Logs + Traces | Not Started | Prometheus, structured Loki logs, and Tempo tracing backend |
 | 6 | Grafana dashboards | Not Started | Unified observability visualization |
 | 7 | Incident Simulator | Not Started | Controlled fault-injection engine for reproducible incidents |

@@ -2,8 +2,10 @@ import uuid
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from logger import get_logger
+from tracer import setup_tracer
 
 app = FastAPI(title="Payment Service")
+tracer = setup_tracer("payment-service", app)
 logger = get_logger("payment-service")
 
 

@@ -4,3 +4,8 @@ httpx
 pydantic
 python-json-logger
 pika
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-httpx
