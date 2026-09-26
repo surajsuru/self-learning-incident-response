@@ -1157,7 +1157,7 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 3 | **PostgreSQL + Redis + RabbitMQ** | **Completed** | State persistence in PostgreSQL, Redis cache-aside, and async messaging with RabbitMQ |
 | 4 | **OpenTelemetry** | **Completed** | Distributed tracing with OpenTelemetry SDK & Jaeger waterfall visualization across all 5 services |
 | 5 | **Metrics + Logs + Traces** | **Completed** | Prometheus metrics scraping, trace-log correlation with trace_id/span_id, and log endpoint filtering |
-| 6 | Grafana dashboards | Not Started | Unified observability visualization |
+| 6 | **Grafana Dashboards** | **Completed** | Unified command center with automated Prometheus & Jaeger datasource provisioning and RED metrics dashboard |
 | 7 | Incident Simulator | Not Started | Controlled fault-injection engine for reproducible incidents |
 | 8 | Incident Scenarios | Not Started | 10 known operational incident scenarios with ground truth |
 | 9 | EvoOps Single Agent + MCP Server | Not Started | Investigation agent powered by FastMCP SRE tool server |
