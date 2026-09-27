@@ -11,6 +11,8 @@ import json
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
+from typing import Dict, Any
+
 
 # Ensure root is in sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent))

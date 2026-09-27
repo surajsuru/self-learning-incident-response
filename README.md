@@ -818,7 +818,7 @@ The project is intentionally staged. We do not build all 16 phases at once. We b
 | 7 | Incident Simulator | Completed |
 | 8 | Incident Scenarios | Completed |
 | 9 | EvoOps Single Agent | Completed |
-| 10 | LangGraph | In Progress |
+| 10 | LangGraph | Completed |
 | 11 | Specialized Agents | Not Started |
 | 12 | Memory | Not Started |
 | 13 | Evaluator | Not Started |
@@ -860,15 +860,15 @@ Add controlled fault injection that produces known operational failures.
 
 ### Phase 8 — Incident Scenarios
 
-Create the first 10 scenario definitions with ground truth.
+Create the 10 production-grade failure scenarios catalog with ground truth (`scenarios/catalog.json`) and the operational runner CLI (`scenarios/runner.py`) for triggering chaos and generating simulated user traffic.
 
 ### Phase 9 — EvoOps Single Agent
 
-Build the first investigation agent and tool-calling workflow.
+Equip the agent with real SRE telemetry tools (`agent/tools.py`) connecting to Prometheus, Jaeger, and microservice endpoints, and implement the autonomous ReAct investigation loop (`agent/investigator.py`).
 
 ### Phase 10 — LangGraph
 
-Move orchestration to a visible state-driven graph.
+Move orchestration from an opaque loop to a state-driven graph (`agent/state.py`, `agent/graph.py`). Implement modular nodes for investigation planning, telemetry collection, root cause analysis, conditional remediation execution, and closed-loop recovery verification.
 
 ### Phase 11 — Specialized Agents
 
