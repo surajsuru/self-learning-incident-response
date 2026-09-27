@@ -1,0 +1,246 @@
+{
+  "version": "1.0",
+  "description": "Ground-truth incident scenario catalog for EvoOps autonomous investigation and remediation.",
+  "scenarios": [
+    {
+      "id": "downstream_timeout",
+      "name": "Payment Service Downstream Latency & Timeout",
+      "category": "latency",
+      "target_service": "payment-service",
+      "port": 8003,
+      "fault_type": "latency",
+      "injection": {
+        "latency_seconds": 3.5,
+        "error_rate": 0.0,
+        "error_code": 500
+      },
+      "symptoms": {
+        "metrics": "Elevated P95/P99 latency in api-gateway and order-service; increased request duration in payment-service.",
+        "traces": "Long horizontal span on payment-service POST /payments/process (>3s) causing parent span /orders to stall.",
+        "logs": "Gateway log contains slow client response warning; payment-service shows delayed request processing."
+      },
+      "misleading_signals": "API Gateway and Order Service show high latency, which could lead a naive engineer to suspect gateway or database saturation.",
+      "root_cause": "Artificial execution delay injected into payment-service HTTP request pipeline.",
+      "recommended_remediation": "Reset payment-service chaos or trigger downstream circuit breaker / restart payment-service.",
+      "risk_level": "medium",
+      "requires_approval": true,
+      "verification_metric": "avg(rate(http_requests_total{status=~'2..'}[1m])) > 0.8"
+    },
+    {
+      "id": "api_error_spike",
+      "name": "Inventory Service HTTP 500 Internal Error Surge",
+      "category": "error_rate",
+      "target_service": "inventory-service",
+      "port": 8002,
+      "fault_type": "error",
+      "injection": {
+        "latency_seconds": 0.0,
+        "error_rate": 0.85,
+        "error_code": 500
+      },
+      "symptoms": {
+        "metrics": "Spike in 5xx HTTP response codes on inventory-service; drop in successful orders on order-service.",
+        "traces": "Red error spans on inventory-service GET /inventory/{item_id} and POST /inventory/reserve.",
+        "logs": "HTTPException: 500 Internal Server Error in inventory-service request handlers."
+      },
+      "misleading_signals": "Order Service returns 500 to the client, masking that the failure originated in the upstream inventory check.",
+      "root_cause": "85% error rate injection on inventory-service endpoints simulating an internal application crash or unhandled exception.",
+      "recommended_remediation": "Reset inventory-service chaos or redeploy last known stable configuration.",
+      "risk_level": "medium",
+      "requires_approval": true,
+      "verification_metric": "sum(rate(http_requests_total{status=~'5..'}[1m])) == 0"
+    },
+    {
+      "id": "high_db_latency",
+      "name": "Order Service Database Query Saturation",
+      "category": "database",
+      "target_service": "order-service",
+      "port": 8001,
+      "fault_type": "latency",
+      "injection": {
+        "latency_seconds": 4.0,
+        "error_rate": 0.0,
+        "error_code": 500
+      },
+      "symptoms": {
+        "metrics": "Order creation latency jumps from ~50ms to >4000ms; connection hold times spike.",
+        "traces": "Trace span for order-service POST /orders remains open for 4+ seconds.",
+        "logs": "Database query execution logs exceed slow query threshold."
+      },
+      "misleading_signals": "Client experiences timeout at API Gateway; user checkout fails before order state is returned.",
+      "root_cause": "Simulated heavy query load / slow table locks on PostgreSQL order table.",
+      "recommended_remediation": "Kill blocking database queries, optimize table indexing, or clear order-service connection delays.",
+      "risk_level": "high",
+      "requires_approval": true,
+      "verification_metric": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service='order-service'}[1m])) by (le)) < 0.5"
+    },
+    {
+      "id": "gateway_503_overload",
+      "name": "API Gateway Service Unavailable (503) Overload",
+      "category": "gateway",
+      "target_service": "api-gateway",
+      "port": 8000,
+      "fault_type": "error",
+      "injection": {
+        "latency_seconds": 0.0,
+        "error_rate": 0.70,
+        "error_code": 503
+      },
+      "symptoms": {
+        "metrics": "HTTP 503 Service Unavailable rates spike at the front edge.",
+        "traces": "Root span on api-gateway terminates immediately with status code 503 without invoking downstream services.",
+        "logs": "Simulated Incident Fault (HTTP 503) logged at API Gateway."
+      },
+      "misleading_signals": "Downstream microservices (order, payment, inventory) report 100% healthy metrics, despite total customer outage.",
+      "root_cause": "Edge proxy rate limiter or thread starvation simulation triggering 503 rejections.",
+      "recommended_remediation": "Scale API Gateway instances, reset edge rate limits, or clear injected fault.",
+      "risk_level": "low",
+      "requires_approval": false,
+      "verification_metric": "sum(rate(http_requests_total{service='api-gateway',status='503'}[1m])) == 0"
+    },
+    {
+      "id": "redis_failure",
+      "name": "Redis Cache Degradation on Inventory Service",
+      "category": "cache",
+      "target_service": "inventory-service",
+      "port": 8002,
+      "fault_type": "error",
+      "injection": {
+        "latency_seconds": 0.5,
+        "error_rate": 0.50,
+        "error_code": 502
+      },
+      "symptoms": {
+        "metrics": "502 Bad Gateway responses on stock verification; cache miss fallback overhead.",
+        "traces": "Inventory service traces show intermittent failures and 500ms delay per stock lookup.",
+        "logs": "Redis connection timeout or cache read fallback exceptions."
+      },
+      "misleading_signals": "Downstream databases show sudden spike in read IOPS because cache misses force database reads.",
+      "root_cause": "Redis connectivity degradation or cache partition.",
+      "recommended_remediation": "Flush Redis cache, verify Redis container health, and reset inventory-service fault.",
+      "risk_level": "medium",
+      "requires_approval": true,
+      "verification_metric": "sum(rate(http_requests_total{service='inventory-service',status='502'}[1m])) == 0"
+    },
+    {
+      "id": "notification_service_lag",
+      "name": "Async Notification Worker Latency Spike",
+      "category": "queue",
+      "target_service": "notification-service",
+      "port": 8004,
+      "fault_type": "latency",
+      "injection": {
+        "latency_seconds": 2.5,
+        "error_rate": 0.0,
+        "error_code": 500
+      },
+      "symptoms": {
+        "metrics": "Notification delivery latency spikes; RabbitMQ consumer acknowledgment delays.",
+        "traces": "Trace span for notification handling extends beyond 2.5 seconds.",
+        "logs": "Delayed order confirmation emails/SMS processing."
+      },
+      "misleading_signals": "Order placement succeeds immediately with HTTP 200, but customers report missing receipt notifications.",
+      "root_cause": "Artificial execution delay in background worker event consumption.",
+      "recommended_remediation": "Scale notification workers or reset notification chaos latency.",
+      "risk_level": "low",
+      "requires_approval": false,
+      "verification_metric": "avg(http_request_duration_seconds{service='notification-service'}) < 0.2"
+    },
+    {
+      "id": "network_jitter_cascade",
+      "name": "Cross-Service Network Latency Cascade",
+      "category": "network",
+      "target_service": "order-service",
+      "port": 8001,
+      "fault_type": "latency",
+      "injection": {
+        "latency_seconds": 1.8,
+        "error_rate": 0.20,
+        "error_code": 504
+      },
+      "symptoms": {
+        "metrics": "Concurrent elevation in latency across API Gateway and Order Service with intermittent 504 Gateway Timeouts.",
+        "traces": "Spans show delayed inter-service HTTPX client communication.",
+        "logs": "HTTPX connection pool warnings and retry attempts logged."
+      },
+      "misleading_signals": "Looks like an infrastructure VM or network interface saturation affecting all services.",
+      "root_cause": "Network packet delay and intermittent drop simulation.",
+      "recommended_remediation": "Reset order-service network parameters, flush stale HTTP connections.",
+      "risk_level": "medium",
+      "requires_approval": true,
+      "verification_metric": "sum(rate(http_requests_total{status='504'}[1m])) == 0"
+    },
+    {
+      "id": "payment_gateway_504_timeout",
+      "name": "Payment Third-Party Gateway 504 Gateway Timeout",
+      "category": "third_party",
+      "target_service": "payment-service",
+      "port": 8003,
+      "fault_type": "error",
+      "injection": {
+        "latency_seconds": 1.0,
+        "error_rate": 0.60,
+        "error_code": 504
+      },
+      "symptoms": {
+        "metrics": "60% failure rate with HTTP 504 on payment endpoints.",
+        "traces": "Order trace stops and marks error on the payment processing child span.",
+        "logs": "Payment processing timeout: upstream payment gateway unreachable."
+      },
+      "misleading_signals": "Order service logs report payment failure, but payments database is completely idle.",
+      "root_cause": "External banking acquirer or payment processing partner gateway timeout.",
+      "recommended_remediation": "Failover to secondary payment provider or reset payment-service fault.",
+      "risk_level": "medium",
+      "requires_approval": true,
+      "verification_metric": "sum(rate(http_requests_total{service='payment-service',status='504'}[1m])) == 0"
+    },
+    {
+      "id": "inventory_depletion_lockout",
+      "name": "Inventory Reservation Resource Exhaustion",
+      "category": "resource",
+      "target_service": "inventory-service",
+      "port": 8002,
+      "fault_type": "error",
+      "injection": {
+        "latency_seconds": 0.2,
+        "error_rate": 0.50,
+        "error_code": 409
+      },
+      "symptoms": {
+        "metrics": "Elevated 409 Conflict status codes on /inventory/reserve.",
+        "traces": "Inventory reservation spans return 409 Conflict.",
+        "logs": "Resource reservation conflict: lock contention on SKU."
+      },
+      "misleading_signals": "Can be mistaken for an actual inventory stockout rather than a locking defect.",
+      "root_cause": "Concurrency conflict simulation on inventory reservation.",
+      "recommended_remediation": "Clear reservation locks, reset inventory chaos state.",
+      "risk_level": "low",
+      "requires_approval": false,
+      "verification_metric": "sum(rate(http_requests_total{service='inventory-service',status='409'}[1m])) == 0"
+    },
+    {
+      "id": "cascading_full_system_brownout",
+      "name": "System-Wide Cascading Brownout",
+      "category": "cascading",
+      "target_service": "order-service",
+      "port": 8001,
+      "fault_type": "combined",
+      "injection": {
+        "latency_seconds": 2.0,
+        "error_rate": 0.40,
+        "error_code": 500
+      },
+      "symptoms": {
+        "metrics": "Widespread latency increase across all tiers, elevated 5xx rates at gateway, consumer queue buildup.",
+        "traces": "Multiple cascading error spans propagating from order-service down to payment and inventory.",
+        "logs": "Cascade of failed downstream HTTP requests and thread exhaustion."
+      },
+      "misleading_signals": "Every dashboard tile in Grafana turns red simultaneously, making root cause pinpointing difficult.",
+      "root_cause": "Core order coordinator degradation triggering cascading timeout and retry loops throughout the cluster.",
+      "recommended_remediation": "Reset order-service fault injection, purge dead-letter messages, restart order-service.",
+      "risk_level": "high",
+      "requires_approval": true,
+      "verification_metric": "sum(rate(http_requests_total{status=~'5..'}[1m])) == 0"
+    }
+  ]
+}

@@ -27,3 +27,8 @@ htmlcov/
 .DS_Store
 Thumbs.db
 *.log
+
+# Environment secrets
+.env
+agent/.env
+*.env
