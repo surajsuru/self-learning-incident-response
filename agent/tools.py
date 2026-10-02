@@ -88,7 +88,7 @@ def get_jaeger_traces(service: str, limit: int = 5) -> str:
     Valid service names: 'api-gateway', 'order-service', 'inventory-service', 'payment-service', 'notification-service'.
     """
     url = f"{JAEGER_URL}/api/traces"
-    params = {"service": service, "limit": limit}
+    params = {"service": service, "limit": limit, "minDuration": "200ms"}
     try:
         with httpx.Client(timeout=5.0) as client:
             resp = client.get(url, params=params)
@@ -107,23 +107,32 @@ def get_jaeger_traces(service: str, limit: int = 5) -> str:
 
                 span_details = []
                 for s in spans:
+                    op = s.get("operationName", "")
+                    op_lower = op.lower()
+                    
+                    # 1. Skip all internal noise (metrics, health, docs, openapi)
+                    if any(noise in op_lower for noise in ["metrics", "health", "docs", "openapi"]):
+                        continue
                     p_id = s.get("processID")
                     svc_name = processes.get(p_id, {}).get("serviceName", "unknown")
                     duration_ms = round(s.get("duration", 0) / 1000.0, 2)
                     has_error = any(tag.get("key") == "error" and tag.get("value") is True for tag in s.get("tags", []))
                     span_details.append({
                         "service": svc_name,
-                        "operation": s.get("operationName"),
+                        "operation": op,
                         "duration_ms": duration_ms,
                         "error": has_error
                     })
-
+                # 2. If all spans in this trace were noise, ignore this trace completely!
+                if not span_details:
+                    continue
                 total_duration = max((s["duration_ms"] for s in span_details), default=0.0)
                 summary.append({
                     "trace_id": trace_id,
                     "total_duration_ms": total_duration,
                     "spans": span_details
                 })
+
             return json.dumps(summary, indent=2)
     except Exception as e:
         return f"Failed to fetch traces from Jaeger: {e}"

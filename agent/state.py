@@ -21,6 +21,10 @@ class InvestigationState(TypedDict):
     metrics_evidence: List[Dict[str, Any]]
     trace_evidence: List[Dict[str, Any]]
     chaos_status: Dict[str, Any]
+
+    # Specialist Reports
+    trace_analysis: Optional[str]      # Written by Trace Specialist
+    metrics_analysis: Optional[str]    # Written by Metrics Specialist
     
     # Reasoning & Diagnosis
     hypotheses: List[str]

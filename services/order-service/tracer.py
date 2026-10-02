@@ -24,7 +24,8 @@ def setup_tracer(service_name: str, app=None):
 
     HTTPXClientInstrumentor().instrument()
 
+
     if app is not None:
-        FastAPIInstrumentor.instrument_app(app)
+        FastAPIInstrumentor.instrument_app(app, excluded_urls=".*metrics.*,.*health.*")
 
     return trace.get_tracer(service_name)

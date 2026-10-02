@@ -819,7 +819,7 @@ The project is intentionally staged. We do not build all 16 phases at once. We b
 | 8 | Incident Scenarios | Completed |
 | 9 | EvoOps Single Agent | Completed |
 | 10 | LangGraph | Completed |
-| 11 | Specialized Agents | Not Started |
+| 11 | Specialized Agents | Completed |
 | 12 | Memory | Not Started |
 | 13 | Evaluator | Not Started |
 | 14 | Self-Learning Loop | Not Started |
@@ -872,7 +872,10 @@ Move orchestration from an opaque loop to a state-driven graph (`agent/state.py`
 
 ### Phase 11 — Specialized Agents
 
-Add agents only where justified by workflow complexity.
+Implement a domain-focused multi-agent incident response team (`agent/specialists.py` and `agent/graph.py`):
+- **Trace Specialist**: Deep-dives into Jaeger distributed traces, span waterfalls, and downstream latency bottlenecks, filtering telemetry noise.
+- **Metrics Specialist**: Analyzes Prometheus PromQL error rates (5xx), request duration, and container health.
+- **Lead SRE Commander**: Synthesizes domain specialist findings, pinpoints the true root cause, debunks misleading signals, and executes closed-loop remediation with post-fix verification.
 
 ### Phase 12 — Memory
 

@@ -46,7 +46,7 @@ def http_post(url: str, data: dict):
         method="POST"
     )
     try:
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             return resp.status, json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         return e.code, e.read().decode("utf-8")
