@@ -1162,12 +1162,12 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 5 | **Metrics + Logs + Traces** | **Completed** | Prometheus metrics scraping, trace-log correlation with trace_id/span_id, and log endpoint filtering |
 | 6 | **Grafana Dashboards** | **Completed** | Unified command center with automated Prometheus & Jaeger datasource provisioning and RED metrics dashboard |
 | 7 | **Incident Simulator** | **Completed** | Controlled fault-injection engine & middleware for dynamic latency, error spikes, and instant reset |
-| 8 | Incident Scenarios | Not Started | 10 known operational incident scenarios with ground truth |
-| 9 | EvoOps Single Agent + MCP Server | Not Started | Investigation agent powered by FastMCP SRE tool server |
-| 10 | LangGraph Orchestration | Not Started | State machine & cyclic investigation workflows |
-| 11 | Specialized Agents | Not Started | Multi-agent collaboration (Metrics, Logs, Traces, Supervisor) |
-| 12 | Memory Architecture | Not Started | Episodic, semantic, and procedural memory stores |
-| 13 | Evaluator | Not Started | Automated diagnosis quality & grounding evaluation |
+| 8 | **Incident Scenarios** | **Completed** | 10 reproducible operational incident scenarios (`scenarios/catalog.json`) with automated runner CLI (`scenarios/runner.py`) |
+| 9 | **EvoOps Single Agent & SRE Tools** | **Completed** | SRE agent loop (`agent/investigator.py`) with Jaeger, Prometheus, health & chaos remediation tools |
+| 10 | **LangGraph State-Driven Workflow** | **Completed** | State-driven multi-step investigation workflow (`agent/state.py`, `agent/graph.py`) with closed-loop recovery verification |
+| 11 | **Specialized Multi-Agent Team** | **Completed** | Collaborative incident response with dedicated Trace & Metrics specialists and Lead SRE Commander (`agent/specialists.py`) |
+| 12 | **Memory Architecture & Experience Retrieval** | **Completed** | Episodic memory engine (`agent/memory.py`, `agent/data/episodic_memory.json`) for historical incident lookup & automated case archival |
+| 13 | Evaluator & Benchmarking | Next | Automated diagnosis quality, grounding evaluation, and ground-truth scoring against incident catalog |
 | 14 | Self-Learning Loop | Not Started | Strategy refinement based on past successful & failed investigations |
 | 15 | Human Approval + Remediation | Not Started | Guardrails, human-in-the-loop approvals, and automated recovery |
 | 16 | Benchmark & Verification | Not Started | Empirical evaluation: Before vs After learning comparison |

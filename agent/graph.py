@@ -34,6 +34,7 @@ from langgraph.graph import StateGraph, START, END
 from agent.state import InvestigationState
 from agent.specialists import run_trace_specialist, run_metrics_specialist
 from agent.tools import inspect_chaos_status, execute_remediation, check_cluster_health
+from agent.memory import retrieve_similar_incidents, save_incident_to_memory
 
 # Load environment
 load_dotenv(Path(__file__).parent / ".env")
@@ -60,19 +61,33 @@ def print_step(title: str, text: str, color: str = "cyan"):
 
 
 # -------------------------------------------------------------
-# GRAPH NODES (MULTI-AGENT TEAM)
+# GRAPH NODES (WITH EPISODIC MEMORY)
 # -------------------------------------------------------------
 
 def node_plan_investigation(state: InvestigationState) -> Dict[str, Any]:
-    """Node 1 (Lead SRE): Formulates the delegation plan for the specialist team."""
+    """Node 1 (Lead SRE): Queries Episodic Memory and formulates the delegation plan."""
     alert = state["alert_description"]
+    # 1. Query Episodic Memory for past similar cases
+    past_cases = retrieve_similar_incidents(alert, top_k=2)
+    memory_summary = ""
+    if past_cases:
+        memory_summary = f"Found {len(past_cases)} past similar incident(s) in episodic memory:\n"
+        for pc in past_cases:
+            memory_summary += f"  - [{pc['incident_id']}]: {pc['alert']} -> Root Cause: {pc['root_cause']}\n"
+    else:
+        memory_summary = "No prior similar incidents found in episodic memory. Investigating as new failure mode."
+    print_step("Phase 1: Episodic Memory Retrieval", memory_summary, "magenta")
     plan = [
         "1. Delegate distributed trace inspection to Trace Specialist (Jaeger).",
         "2. Delegate telemetry and health verification to Metrics Specialist (Prometheus).",
-        "3. Lead SRE synthesizes both findings to determine Root Cause and Remediation."
+        "3. Lead SRE synthesizes both findings with Episodic Memory to determine Root Cause."
     ]
     print_step("Phase 1: Lead SRE Delegating Tasks", "\n".join(plan), "cyan")
-    return {"current_phase": "delegating_specialists", "investigation_plan": plan}
+    return {
+        "current_phase": "delegating_specialists",
+        "investigation_plan": plan,
+        "similar_incidents": past_cases
+    }
 
 
 def node_trace_specialist(state: InvestigationState) -> Dict[str, Any]:
@@ -91,30 +106,33 @@ def node_metrics_specialist(state: InvestigationState) -> Dict[str, Any]:
 
 
 def node_diagnose_root_cause(state: InvestigationState) -> Dict[str, Any]:
-    """Node 4 (Lead SRE): Reviews reports from both specialists and determines Root Cause."""
+    """Node 4 (Lead SRE): Reviews specialist reports and Episodic Memory to determine Root Cause."""
+    past_memory_text = json.dumps(state.get("similar_incidents", []), indent=2)
     prompt = f"""You are the Lead SRE Commander.
-Incident Alert: {state['alert_description']}
---- Report from Trace Specialist ---
-{state.get('trace_analysis', 'No trace data')}
---- Report from Metrics Specialist ---
-{state.get('metrics_analysis', 'No metrics data')}
-Instructions:
-Synthesize these specialist reports to identify:
-1. The TRUE Root Cause (which exact service is responsible).
-2. Any Misleading Signals debunked (e.g. why API Gateway or Order Service seemed slow).
-3. Recommended Action ('reset_chaos').
-4. Target Service (e.g. 'payment-service').
-5. Risk Level: 'low', 'medium', or 'high'.
-6. Confidence Score between 0.0 and 1.0 (e.g. 0.95).
-Output in STRICT JSON format:
-{{
-  "root_cause": "description of root cause",
-  "misleading_signals": "description of misleading symptoms",
-  "recommended_action": "reset_chaos",
-  "target_service": "payment-service",
-  "risk_level": "medium",
-  "confidence_score": 0.95
-}}"""
+        Incident Alert: {state['alert_description']}
+        --- Episodic Memory (Past Similar Incidents) ---
+        {past_memory_text}
+        --- Report from Trace Specialist ---
+        {state.get('trace_analysis', 'No trace data')}
+        --- Report from Metrics Specialist ---
+        {state.get('metrics_analysis', 'No metrics data')}
+        Instructions:
+        Synthesize the specialist reports and past memory to identify:
+        1. The TRUE Root Cause (which exact service is responsible).
+        2. Any Misleading Signals debunked (e.g. why API Gateway or Order Service seemed slow).
+        3. Recommended Action ('reset_chaos').
+        4. Target Service (e.g. 'payment-service').
+        5. Risk Level: 'low', 'medium', or 'high'.
+        6. Confidence Score between 0.0 and 1.0 (e.g. 0.95).
+        Output in STRICT JSON format:
+        {{
+        "root_cause": "description of root cause",
+        "misleading_signals": "description of misleading symptoms",
+        "recommended_action": "reset_chaos",
+        "target_service": "payment-service",
+        "risk_level": "medium",
+        "confidence_score": 0.95
+        }}"""
     res = llm.invoke([SystemMessage(content="You are a senior SRE Commander. Return only valid JSON."), HumanMessage(content=prompt)])
     content = res.content.strip()
     if content.startswith("```json"):
@@ -146,6 +164,7 @@ Output in STRICT JSON format:
         "risk_level": diagnosis.get("risk_level", "medium"),
         "confidence_score": float(diagnosis.get("confidence_score", 0.95)),
     }
+
 
 
 def node_execute_remediation(state: InvestigationState) -> Dict[str, Any]:
@@ -194,30 +213,38 @@ def node_verify_recovery(state: InvestigationState) -> Dict[str, Any]:
 
 
 def node_generate_report(state: InvestigationState) -> Dict[str, Any]:
-    """Node 7: Compiles the final Multi-Agent Postmortem Report."""
+    """Node 7: Compiles the final report and saves experience to Episodic Memory."""
     report = f"""# Multi-Agent Incident Postmortem Report
-**Incident ID:** {state.get('incident_id')}  
-**Alert:** {state.get('alert_description')}  
-**Confidence Score:** {state.get('confidence_score', 0.0) * 100:.0f}%  
-**Recovery Verified:** {'✅ Yes' if state.get('recovery_verified') else '❌ No / Pending'}
----
-### 1. Incident Room Delegation
-* **Trace Specialist Finding:** {state.get('trace_analysis')}
-* **Metrics Specialist Finding:** {state.get('metrics_analysis')}
-### 2. Root Cause Analysis (RCA) by Lead SRE
-* **True Root Cause:** {state.get('root_cause')}
-* **Affected Component:** `{state.get('target_service')}`
-* **Misleading Symptoms Debunked:** {state.get('misleading_signals')}
-### 3. Remediation & Recovery
-* **Action Planned:** `{state.get('recommended_action')}` on `{state.get('target_service')}`
-* **Execution Status:** {state.get('remediation_result')}
-* **Verification:** {'System confirmed healthy and back to normal latency.' if state.get('recovery_verified') else 'Recovery pending verification.'}
-### 4. Prevention Recommendations
-1. Implement circuit breaking between `order-service` and `payment-service`.
-2. Add automated P95 alert notifications in Prometheus for `payment-service`.
-"""
+        **Incident ID:** {state.get('incident_id')}  
+        **Alert:** {state.get('alert_description')}  
+        **Confidence Score:** {state.get('confidence_score', 0.0) * 100:.0f}%  
+        **Recovery Verified:** {'✅ Yes' if state.get('recovery_verified') else '❌ No / Pending'}
+        ---
+        ### 1. Episodic Memory Context
+        * **Prior Cases Consulted:** {len(state.get('similar_incidents', []))} past incident(s) found in archive.
+        ### 2. Incident Room Delegation
+        * **Trace Specialist Finding:** {state.get('trace_analysis')}
+        * **Metrics Specialist Finding:** {state.get('metrics_analysis')}
+        ### 3. Root Cause Analysis (RCA) by Lead SRE
+        * **True Root Cause:** {state.get('root_cause')}
+        * **Affected Component:** `{state.get('target_service')}`
+        * **Misleading Symptoms Debunked:** {state.get('misleading_signals')}
+        ### 4. Remediation & Recovery
+        * **Action Planned:** `{state.get('recommended_action')}` on `{state.get('target_service')}`
+        * **Execution Status:** {state.get('remediation_result')}
+        * **Verification:** {'System confirmed healthy and back to normal latency.' if state.get('recovery_verified') else 'Recovery pending verification.'}
+        ### 5. Prevention Recommendations
+        1. Implement circuit breaking between `order-service` and `payment-service`.
+        2. Add automated P95 alert notifications in Prometheus for `payment-service`.
+        """
     print_step("Phase 6: Final Multi-Agent Postmortem", report, "green")
+    # If recovery was verified, store this new case into Episodic Memory!
+    if state.get("recovery_verified"):
+        saved = save_incident_to_memory(state)
+        if saved:
+            print_step("Episodic Memory Updated", f"Incident {state.get('incident_id')} successfully archived to episodic memory for future learning!", "magenta")
     return {"final_report": report}
+
 
 
 
@@ -281,16 +308,23 @@ def main():
 
     app = build_incident_graph()
 
+    # Generate a unique incident ID using timestamp
+    import time
+    inc_id = f"INC-{int(time.time()) % 10000}"
+
     initial_state: InvestigationState = {
-        "incident_id": "INC-8492",
+        "incident_id": inc_id,
         "alert_description": args.alert,
         "auto_remediate": args.auto_remediate,
         "current_phase": "started",
         "investigation_plan": [],
+        "similar_incidents": None,
         "cluster_health": {},
         "metrics_evidence": [],
         "trace_evidence": [],
         "chaos_status": {},
+        "trace_analysis": None,
+        "metrics_analysis": None,
         "hypotheses": [],
         "root_cause": None,
         "misleading_signals": None,
@@ -302,13 +336,12 @@ def main():
         "recovery_verified": False,
         "final_report": None,
     }
-
     print(f"\n{'='*75}")
-    print(f"  EvoOps LangGraph Orchestrator Running")
-    print(f"  Model: {OPENAI_MODEL_NAME} | Auto-Remediate: {args.auto_remediate}")
+    print(f"  EvoOps Multi-Agent Incident Response Room (With Episodic Memory)")
+    print(f"  Model: {OPENAI_MODEL_NAME} | Incident: {inc_id} | Auto-Remediate: {args.auto_remediate}")
     print(f"{'='*75}\n")
-
     app.invoke(initial_state)
+
 
 
 if __name__ == "__main__":

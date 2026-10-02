@@ -15,6 +15,9 @@ class InvestigationState(TypedDict):
     # Investigation Lifecycle
     current_phase: str
     investigation_plan: List[str]
+
+    # Episodic Memory (Phase 12)
+    similar_incidents: Optional[List[Dict[str, Any]]]  # Retrieved past incident cases
     
     # Telemetry Evidence Collected
     cluster_health: Dict[str, Any]

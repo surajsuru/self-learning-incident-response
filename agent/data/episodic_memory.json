@@ -1,0 +1,32 @@
+[
+  {
+    "incident_id": "INC-HIST-01",
+    "timestamp": "2026-08-15T14:30:00Z",
+    "alert": "Alert: Database query connection pool exhaustion on order-service",
+    "symptoms": "High P99 latency on POST /orders (>4s); database connection timeout errors in order-service logs.",
+    "root_cause": "PostgreSQL connection pool exhausted due to long-running unindexed transaction locks.",
+    "remediation_action": "reset_chaos",
+    "target_service": "order-service",
+    "resolution_notes": "Cleared hung database queries and restarted order-service connection pool."
+  },
+  {
+    "incident_id": "INC-HIST-02",
+    "timestamp": "2026-09-02T09:15:00Z",
+    "alert": "Alert: 502 Bad Gateway spike on inventory stock verification",
+    "symptoms": "Inventory stock check endpoint returning 502; Redis cache read timeout.",
+    "root_cause": "Redis cache degradation on inventory-service forcing database fallback overload.",
+    "remediation_action": "reset_chaos",
+    "target_service": "inventory-service",
+    "resolution_notes": "Reset inventory-service chaos and verified Redis container ping health."
+  },
+  {
+    "incident_id": "INC-5480",
+    "timestamp": "2026-10-02T15:38:20.744901Z",
+    "alert": "Alert: High latency observed on order creation endpoints (> 3s)",
+    "symptoms": "Trace: ### Trace Analysis Report\n\n- **Root Service vs. Bottleneck Service**: The root service is the **api-gateway**, while the bottleneck service is the **order-service**.\n  \n- **Specific Span Durations**:\n | Metrics: - **Health Status of Containers**: All containers (api-gateway, order-service, inventory-service, payment-service, notification-service) are healthy and reachable.\n  \n- **Prometheus Metrics**: The pay",
+    "root_cause": "The high latency observed on order creation endpoints is primarily due to the order-service, which is taking significantly longer to process requests compared to other services.",
+    "remediation_action": "reset_chaos",
+    "target_service": "payment-service",
+    "resolution_notes": "Verified: True. Confidence: 95%"
+  }
+]
