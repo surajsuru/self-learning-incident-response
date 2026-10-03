@@ -1167,8 +1167,8 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 10 | **LangGraph State-Driven Workflow** | **Completed** | State-driven multi-step investigation workflow (`agent/state.py`, `agent/graph.py`) with closed-loop recovery verification |
 | 11 | **Specialized Multi-Agent Team** | **Completed** | Collaborative incident response with dedicated Trace & Metrics specialists and Lead SRE Commander (`agent/specialists.py`) |
 | 12 | **Memory Architecture & Experience Retrieval** | **Completed** | Episodic memory engine (`agent/memory.py`, `agent/data/episodic_memory.json`) for historical incident lookup & automated case archival |
-| 13 | Evaluator & Benchmarking | Next | Automated diagnosis quality, grounding evaluation, and ground-truth scoring against incident catalog |
-| 14 | Self-Learning Loop | Not Started | Strategy refinement based on past successful & failed investigations |
+| 13 | **Evaluator & Benchmarking** | **Completed** | Ground-truth scoring engine (`agent/evaluator.py`, `agent/data/eval_benchmarks.json`) grading SRE investigations across 5 dimensions |
+| 14 | Self-Learning Loop | Next | Strategy refinement based on past successful & failed investigations |
 | 15 | Human Approval + Remediation | Not Started | Guardrails, human-in-the-loop approvals, and automated recovery |
 | 16 | Benchmark & Verification | Not Started | Empirical evaluation: Before vs After learning comparison |
 

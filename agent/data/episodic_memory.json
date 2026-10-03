@@ -28,5 +28,15 @@
     "remediation_action": "reset_chaos",
     "target_service": "payment-service",
     "resolution_notes": "Verified: True. Confidence: 95%"
+  },
+  {
+    "incident_id": "INC-8284",
+    "timestamp": "2026-10-03T09:04:59.921218Z",
+    "alert": "Alert: High latency observed on order creation endpoints (> 3s)",
+    "symptoms": "Trace: - **Root Service vs. Bottleneck Service**: The root service is the `api-gateway`, while the bottleneck service is the `payment-service`.\n- **Specific Span Duration**: The `POST /payment/process` opera | Metrics: - **Health Status of Containers**: All containers (api-gateway, order-service, inventory-service, payment-service, notification-service) are healthy and reachable.\n  \n- **Prometheus Latency Metrics**:",
+    "root_cause": "The high latency observed on order creation endpoints is primarily due to the payment-service, which is taking an excessive amount of time to process payment requests, thereby delaying upstream callers like order-service and api-gateway.",
+    "remediation_action": "reset_chaos",
+    "target_service": "payment-service",
+    "resolution_notes": "Verified: True. Confidence: 95%"
   }
 ]

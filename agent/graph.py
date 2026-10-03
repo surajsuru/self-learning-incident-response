@@ -118,8 +118,8 @@ def node_diagnose_root_cause(state: InvestigationState) -> Dict[str, Any]:
         {state.get('metrics_analysis', 'No metrics data')}
         Instructions:
         Synthesize the specialist reports and past memory to identify:
-        1. The TRUE Root Cause (which exact service is responsible).
-        2. Any Misleading Signals debunked (e.g. why API Gateway or Order Service seemed slow).
+        1. The TRUE Root Cause: You MUST explicitly attribute the fault to the target_service (e.g. explain that payment-service latency delayed upstream callers like order-service). The service in root_cause MUST match target_service.
+        2. Any Misleading Signals debunked: Explicitly state why caller services (like order-service or api-gateway) are innocent victims merely waiting on downstream dependencies.
         3. Recommended Action ('reset_chaos').
         4. Target Service (e.g. 'payment-service').
         5. Risk Level: 'low', 'medium', or 'high'.

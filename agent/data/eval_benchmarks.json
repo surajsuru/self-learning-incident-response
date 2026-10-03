@@ -1,0 +1,119 @@
+[
+  {
+    "evaluation_id": "EVAL-20261003074012",
+    "timestamp": "2026-10-03T07:40:12.048953Z",
+    "incident_id": "INC-5480",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "grade": "C",
+    "composite_score": 75.0,
+    "breakdown": {
+      "service_accuracy": {
+        "score": 100.0,
+        "weight": "30%",
+        "expected": "payment-service",
+        "diagnosed": "payment-service",
+        "passed": true
+      },
+      "root_cause_accuracy": {
+        "score": 0.0,
+        "weight": "25%",
+        "reasoning": "The agent's diagnosed root cause incorrectly attributes the high latency to the order-service, while the ground truth indicates that the issue was due to an artificial execution delay in the payment-service. The agent failed to capture the correct service and the specific nature of the failure mechanism."
+      },
+      "remediation_precision": {
+        "score": 100.0,
+        "weight": "20%",
+        "action": "reset_chaos"
+      },
+      "misleading_signal_handling": {
+        "score": 100.0,
+        "weight": "15%",
+        "comment": "Successfully bypassed caller latency decoys and isolated the downstream culprit."
+      },
+      "evidence_grounding": {
+        "score": 100.0,
+        "weight": "10%",
+        "has_trace": true,
+        "has_metrics": true
+      }
+    }
+  },
+  {
+    "evaluation_id": "EVAL-20261003090529",
+    "timestamp": "2026-10-03T09:05:29.822270+00:00",
+    "incident_id": "INC-8284",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "grade": "B",
+    "composite_score": 82.5,
+    "breakdown": {
+      "service_accuracy": {
+        "score": 100.0,
+        "weight": "30%",
+        "expected": "payment-service",
+        "diagnosed": "payment-service",
+        "passed": true
+      },
+      "root_cause_accuracy": {
+        "score": 30.0,
+        "weight": "25%",
+        "reasoning": "The agent incorrectly identified the root cause as a performance issue with the payment-service rather than recognizing the artificial execution delay that was intentionally injected into the request pipeline. This indicates a misunderstanding of the actual failure mechanism."
+      },
+      "remediation_precision": {
+        "score": 100.0,
+        "weight": "20%",
+        "action": "reset_chaos"
+      },
+      "misleading_signal_handling": {
+        "score": 100.0,
+        "weight": "15%",
+        "comment": "Successfully bypassed caller latency decoys and isolated the downstream culprit."
+      },
+      "evidence_grounding": {
+        "score": 100.0,
+        "weight": "10%",
+        "has_trace": true,
+        "has_metrics": true
+      }
+    }
+  },
+  {
+    "evaluation_id": "EVAL-20261003091859",
+    "timestamp": "2026-10-03T09:18:59.644033+00:00",
+    "incident_id": "INC-8284",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "grade": "A",
+    "composite_score": 97.5,
+    "breakdown": {
+      "service_accuracy": {
+        "score": 100.0,
+        "weight": "30%",
+        "expected": "payment-service",
+        "diagnosed": "payment-service",
+        "passed": true
+      },
+      "root_cause_accuracy": {
+        "score": 90.0,
+        "weight": "25%",
+        "reasoning": "The agent correctly identified that the payment-service was causing high latency, which aligns with the ground truth that there was an artificial delay. However, the agent did not specify that the delay was artificially injected, which is a critical detail. The explanation captures the essence of the issue but lacks the specificity of the root cause being an intentional delay."
+      },
+      "remediation_precision": {
+        "score": 100.0,
+        "weight": "20%",
+        "action": "reset_chaos"
+      },
+      "misleading_signal_handling": {
+        "score": 100.0,
+        "weight": "15%",
+        "comment": "Successfully bypassed caller latency decoys and isolated the downstream culprit."
+      },
+      "evidence_grounding": {
+        "score": 100.0,
+        "weight": "10%",
+        "has_trace": true,
+        "has_metrics": true
+      }
+    }
+  }
+]
