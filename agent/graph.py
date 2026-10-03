@@ -35,6 +35,10 @@ from agent.state import InvestigationState
 from agent.specialists import run_trace_specialist, run_metrics_specialist
 from agent.tools import inspect_chaos_status, execute_remediation, check_cluster_health
 from agent.memory import retrieve_similar_incidents, save_incident_to_memory
+from agent.learning import retrieve_learned_strategies
+from agent.evaluator import match_scenario_for_incident, evaluate_investigation, save_benchmark_result, display_scorecard
+from agent.learning import extract_learning_from_eval, save_learned_strategy, display_strategies
+
 
 # Load environment
 load_dotenv(Path(__file__).parent / ".env")
@@ -69,14 +73,18 @@ def node_plan_investigation(state: InvestigationState) -> Dict[str, Any]:
     alert = state["alert_description"]
     # 1. Query Episodic Memory for past similar cases
     past_cases = retrieve_similar_incidents(alert, top_k=2)
-    memory_summary = ""
-    if past_cases:
-        memory_summary = f"Found {len(past_cases)} past similar incident(s) in episodic memory:\n"
-        for pc in past_cases:
-            memory_summary += f"  - [{pc['incident_id']}]: {pc['alert']} -> Root Cause: {pc['root_cause']}\n"
+    
+    # 2. Query Procedural Memory for learned SRE playbook rules
+    learned_rules = retrieve_learned_strategies(alert, top_k=2)
+    rules_summary = ""
+    if learned_rules:
+        rules_summary = f"Loaded {len(learned_rules)} learned strategy rule(s) from playbook:\n"
+        for r in learned_rules:
+            rules_summary += f"  - [{r.get('category')}]: DO: {r.get('proven_strategy')} | AVOID: {r.get('anti_pattern')}\n"
     else:
-        memory_summary = "No prior similar incidents found in episodic memory. Investigating as new failure mode."
-    print_step("Phase 1: Episodic Memory Retrieval", memory_summary, "magenta")
+        rules_summary = "No specific learned strategy found; applying standard SRE principles."
+    print_step("Phase 1: Procedural Playbook Rules Loaded", rules_summary, "green")
+
     plan = [
         "1. Delegate distributed trace inspection to Trace Specialist (Jaeger).",
         "2. Delegate telemetry and health verification to Metrics Specialist (Prometheus).",
@@ -86,7 +94,8 @@ def node_plan_investigation(state: InvestigationState) -> Dict[str, Any]:
     return {
         "current_phase": "delegating_specialists",
         "investigation_plan": plan,
-        "similar_incidents": past_cases
+        "similar_incidents": past_cases,
+        "learned_strategies": learned_rules
     }
 
 
@@ -108,8 +117,11 @@ def node_metrics_specialist(state: InvestigationState) -> Dict[str, Any]:
 def node_diagnose_root_cause(state: InvestigationState) -> Dict[str, Any]:
     """Node 4 (Lead SRE): Reviews specialist reports and Episodic Memory to determine Root Cause."""
     past_memory_text = json.dumps(state.get("similar_incidents", []), indent=2)
+    learned_rules_text = json.dumps(state.get("learned_strategies", []), indent=2)
     prompt = f"""You are the Lead SRE Commander.
         Incident Alert: {state['alert_description']}
+        --- Learned SRE Playbook (Procedural Rules & Anti-Patterns) ---
+        {learned_rules_text}
         --- Episodic Memory (Past Similar Incidents) ---
         {past_memory_text}
         --- Report from Trace Specialist ---
@@ -238,12 +250,33 @@ def node_generate_report(state: InvestigationState) -> Dict[str, Any]:
         2. Add automated P95 alert notifications in Prometheus for `payment-service`.
         """
     print_step("Phase 6: Final Multi-Agent Postmortem", report, "green")
-    # If recovery was verified, store this new case into Episodic Memory!
+    # Closed-Loop Self-Learning (Phases 12, 13, 14)
     if state.get("recovery_verified"):
+        # 1. Save to Episodic Memory
         saved = save_incident_to_memory(state)
         if saved:
-            print_step("Episodic Memory Updated", f"Incident {state.get('incident_id')} successfully archived to episodic memory for future learning!", "magenta")
-    return {"final_report": report}
+            print_step("Episodic Memory Updated", f"Incident {state.get('incident_id')} archived to episodic memory.", "magenta")
+        
+        # 2. Automated Evaluation against Ground Truth (Phase 13)
+        incident_record = {
+            "incident_id": state.get("incident_id"),
+            "alert": state.get("alert_description"),
+            "target_service": state.get("target_service"),
+            "root_cause": state.get("root_cause"),
+            "remediation_action": state.get("recommended_action"),
+            "symptoms": f"Trace: {state.get('trace_analysis', '')[:200]} | Metrics: {state.get('metrics_analysis', '')[:200]}"
+        }
+        gt_scenario = match_scenario_for_incident(incident_record)
+        if gt_scenario:
+            eval_card = evaluate_investigation(incident_record, gt_scenario)
+            save_benchmark_result(eval_card)
+            display_scorecard(eval_card)
+            # 3. Continuous Strategy Learning (Phase 14)
+            new_strat = extract_learning_from_eval(eval_card)
+            if new_strat and save_learned_strategy(new_strat):
+                print_step("Playbook Updated", f"New SRE Rule '{new_strat['strategy_id']}' added to learned_strategies.json!", "green")
+                display_strategies([new_strat])
+
 
 
 

@@ -1,0 +1,26 @@
+[
+  {
+    "strategy_id": "STRAT-INIT-01",
+    "category": "database_saturation",
+    "proven_strategy": "When order-service query latency spikes, verify PostgreSQL connection pool locks before assuming general container CPU saturation.",
+    "anti_pattern": "Do not restart application containers without checking if unindexed database transactions are blocking threads.",
+    "timestamp": "2026-08-15T00:00:00Z"
+  },
+  {
+    "strategy_id": "STRAT-INIT-02",
+    "category": "cache_degradation",
+    "proven_strategy": "When stock verification returns 502, check Redis cache read timeouts before suspecting inventory application code errors.",
+    "anti_pattern": "Do not treat cache fallback database overload as a database schema bug.",
+    "timestamp": "2026-09-02T00:00:00Z"
+  },
+  {
+    "strategy_id": "STRAT-20261003102552",
+    "incident_id": "INC-8284",
+    "scenario": "Payment Service Downstream Latency & Timeout",
+    "category": "latency_propagation",
+    "proven_strategy": "Always verify if latency issues are due to intentional delays by checking for injected delays in the service configuration or code.",
+    "anti_pattern": "Avoid assuming that high latency is solely due to external factors; ensure to investigate and confirm if the delay is artificially introduced.",
+    "grade_achieved": "A",
+    "timestamp": "2026-10-03T10:25:52.436444+00:00"
+  }
+]
