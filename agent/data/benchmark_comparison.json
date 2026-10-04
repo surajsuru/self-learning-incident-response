@@ -1,0 +1,48 @@
+[
+  {
+    "benchmark_id": "BENCH-COMP-20261004074100",
+    "timestamp": "2026-10-04T07:41:00.912205+00:00",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "before_learning": {
+      "composite_score": 80.0,
+      "grade": "B",
+      "service_diagnosed": "payment-service",
+      "root_cause_score": 20.0,
+      "rules_used": 0,
+      "duration": 35.16
+    },
+    "after_learning": {
+      "composite_score": 92.5,
+      "grade": "A",
+      "service_diagnosed": "payment-service",
+      "root_cause_score": 70.0,
+      "rules_used": 2,
+      "duration": 8.13
+    },
+    "score_improvement": 12.5
+  },
+  {
+    "benchmark_id": "BENCH-COMP-20261004074135",
+    "timestamp": "2026-10-04T07:41:35.031513+00:00",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "before_learning": {
+      "composite_score": 80.0,
+      "grade": "B",
+      "service_diagnosed": "payment-service",
+      "root_cause_score": 20.0,
+      "rules_used": 0,
+      "duration": 9.43
+    },
+    "after_learning": {
+      "composite_score": 92.5,
+      "grade": "A",
+      "service_diagnosed": "payment-service",
+      "root_cause_score": 70.0,
+      "rules_used": 2,
+      "duration": 7.78
+    },
+    "score_improvement": 12.5
+  }
+]
