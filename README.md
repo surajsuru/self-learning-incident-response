@@ -57,6 +57,9 @@ We are not trying to build a generic chatbot. We are building an application-lev
 - evidence-based tooling,
 - structured decision-making,
 - a LangGraph orchestration layer,
+- Model Context Protocol (MCP) standardized tool servers,
+- LLMOps telemetry (token counting, cost attribution, latency tracking),
+- automated CI/CD benchmark regression gates,
 - memory and strategy reuse,
 - evaluation and benchmarking,
 - human oversight for risky actions.
@@ -68,6 +71,9 @@ The project is built to teach the following engineering disciplines together:
 - observability architecture,
 - operational incident response,
 - agent orchestration,
+- Model Context Protocol (MCP) server development,
+- LLMOps and cost governance in AI agents,
+- automated CI/CD evaluation and regression prevention,
 - LLM tool use,
 - memory systems,
 - evaluation of AI systems,
@@ -135,6 +141,21 @@ EvoOps should eventually:
 - verify recovery,
 - evaluate its own performance,
 - update future strategy based on learning.
+
+---
+
+### System C — Enterprise Standards: Model Context Protocol (MCP) & LLMOps Engine
+
+To bridge the gap between autonomous AI research and real-world enterprise engineering, EvoOps integrates two modern, production-grade AI engineering standards:
+
+1. **Model Context Protocol (MCP) SRE Tool Server**:
+   - Instead of locking agent tools into proprietary internal scripts, EvoOps implements an open **Model Context Protocol (MCP)** server (`mcp/sre_server.py`) adhering to the Anthropic open standard.
+   - **Industry Use Case:** In modern enterprise environments, AI frontends evolve rapidly (Claude Desktop, Cursor, VS Code AI assistants, terminal agents). Exposing telemetry tools (Prometheus queries, Jaeger trace analysis, service health checks, remediation actions) over MCP standardizes integration via JSON-RPC. Any MCP host can connect to the distributed cluster to diagnose live systems without custom glue code.
+   - **Security & Sandboxing:** Standardized MCP schemas enforce strict parameter typing, validation, and permission boundaries between the LLM client and the infrastructure.
+
+2. **LLMOps, Cost Governance & CI/CD Regression Gates**:
+   - **Operational LLM Telemetry:** Enterprise AI systems require strict operational and financial accountability. EvoOps LLMOps instrumentation tracks prompt tokens, completion tokens, cached tokens, API inference latency, and real-time USD cost estimation for every incident investigation.
+   - **Automated CI/CD Evaluation Gate:** AI agent reliability cannot rely on manual testing. EvoOps integrates with GitHub Actions CI/CD pipelines to run automated empirical benchmarks against ground-truth incident scenarios on every pull request, enforcing a strict merge gate guaranteeing diagnostic accuracy never regresses below Grade A (90%+).
 
 ---
 
@@ -848,7 +869,7 @@ This is not fake scoring; it is a real evaluation framework based on known groun
 
 ## Phased Implementation Roadmap
 
-The project is intentionally staged. We do not build all 16 phases at once. We build in layers so the architecture stays understandable and testable.
+The project is intentionally staged. We do not build all 20 phases at once. We build in layers so the architecture stays understandable and testable.
 
 | Phase | Name | Status |
 | --- | --- | --- |
@@ -868,6 +889,10 @@ The project is intentionally staged. We do not build all 16 phases at once. We b
 | 14 | Self-Learning Loop | Completed |
 | 15 | Human Approval + Remediation | Completed |
 | 16 | Benchmark | Completed |
+| 17 | Model Context Protocol (MCP) SRE Server | In Progress |
+| 18 | LLMOps Cost & Token Telemetry | Planned |
+| 19 | CI/CD Benchmark Regression Gate | Planned |
+| 20 | Containerized Production Deployment | Planned |
 
 ---
 
@@ -940,6 +965,22 @@ Add safety controls and approved remediation execution.
 
 Run measured evaluations to prove learning improvement.
 
+### Phase 17 — Model Context Protocol (MCP) SRE Server
+
+Standardize all EvoOps diagnostic and remediation capabilities using Anthropic's open Model Context Protocol (MCP). Expose Prometheus querying, Jaeger trace retrieval, service health inspections, and controlled remediation actions over a clean JSON-RPC protocol. This transforms EvoOps into an open SRE tool server consumable by any external MCP host (Claude Desktop, Cursor, custom agents) without custom glue code.
+
+### Phase 18 — LLMOps Cost & Token Telemetry
+
+Implement production-grade LLMOps instrumentation across all SRE agent workflows. Track input tokens, output tokens, cached tokens, API call latencies, and dollar cost attribution per incident run. Expose LLM operational metrics to Prometheus and Grafana dashboards for complete financial and operational governance.
+
+### Phase 19 — CI/CD Benchmark Regression Gate
+
+Embed the Phase 16 empirical evaluation suite directly into continuous integration (GitHub Actions). Run end-to-end incident investigation benchmarks automatically on pull requests to ensure that prompt changes, memory updates, or agent refactoring never regress diagnostic accuracy below Grade A (90%+ composite score).
+
+### Phase 20 — Containerized Production Deployment
+
+Package the multi-agent SRE runtime, MCP server, and evaluation pipeline into production Docker containers. Update `docker-compose.yml` to orchestrate EvoCommerce, the full observability stack (Prometheus, Jaeger, Grafana), and the autonomous EvoOps agent in an isolated, production-parity network environment.
+
 ---
 
 ## Technology Selection Principle
@@ -970,6 +1011,9 @@ This is deliberate. We are not adding technology because it is popular or fashio
 - Docker Compose
 - LangChain
 - LangGraph
+- Model Context Protocol (MCP) Python SDK
+- LLMOps Telemetry & Cost Tracking
+- GitHub Actions CI/CD Workflows
 - Pydantic
 - SQLAlchemy or similar ORM/database access layer
 - pytest for testing
@@ -1214,4 +1258,8 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 14 | **Self-Learning Loop** | **Completed** | Autonomous procedural learning engine (`agent/learning.py`, `agent/data/learned_strategies.json`) extracting strategies & anti-patterns from evaluation scorecards |
 | 15 | **Human Approval & Remediation Guardrails** | **Completed** | 3-tier risk governance (`agent/guardrails.py`, `agent/data/approval_audit.json`) with interactive operator gates & audit logging |
 | 16 | **Benchmark & Verification** | **Completed** | Empirical A/B test suite (`agent/benchmark.py`, `agent/data/benchmark_comparison.json`) proving +12.5% score & +50% root cause improvement |
+| 17 | **Model Context Protocol (MCP) SRE Server** | **In Progress** | Standardized JSON-RPC SRE tool server enabling any MCP-compliant AI client (Claude Desktop, Cursor) to inspect & remediate cluster incidents |
+| 18 | **LLMOps Cost & Token Telemetry** | **Planned** | Operational LLM telemetry tracking token consumption, latency, and USD cost attribution per incident investigation |
+| 19 | **CI/CD Benchmark Regression Gate** | **Planned** | Automated GitHub Actions CI workflow running empirical benchmarks on PRs to prevent diagnostic regression below Grade A (90%) |
+| 20 | **Containerized Production Deployment** | **Planned** | Full container packaging of agent runtime and MCP server in Docker Compose for production parity and air-gapped deployment |
 
