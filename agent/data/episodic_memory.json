@@ -58,5 +58,15 @@
     "remediation_action": "reset_chaos",
     "target_service": "payment-service",
     "resolution_notes": "Verified: True. Confidence: 95%"
+  },
+  {
+    "incident_id": "INC-1234",
+    "timestamp": "2026-10-04T08:08:23.767458Z",
+    "alert": "Alert: HTTP 500 error surge observed on order checkout",
+    "symptoms": "Trace: - **Root Service vs. Bottleneck Service**: The root service is the **api-gateway**, and the bottleneck service is the **order-service**.\n- **Specific Span Duration**: The span `POST /orders` in the ** | Metrics: - **Container Health Status**: All containers (api-gateway, order-service, inventory-service, payment-service, notification-service) are healthy and reachable.\n  \n- **Prometheus Metrics**: A 5xx error",
+    "root_cause": "The order-service is experiencing high latency due to unindexed database transactions blocking threads, leading to HTTP 500 errors.",
+    "remediation_action": "reset_chaos",
+    "target_service": "order-service",
+    "resolution_notes": "Verified: True. Confidence: 95%"
   }
 ]

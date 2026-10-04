@@ -724,7 +724,14 @@ We benchmark with known incident scenarios and ground truth to compare:
 - **Before Experience Learning** (Cold Start, zero-shot without memory or playbook)
 - **After Experience Learning** (Warm, utilizing episodic memory & learned procedural playbook)
 
-### Empirical Verification Results (Scenario: `downstream_timeout`)
+### Multi-Scenario Empirical Verification
+
+| Scenario ID | Name | Failure Domain | Culprit Service | Composite Score | Grade | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `downstream_timeout` | Payment Downstream Latency | Latency Propagation | `payment-service` | **97.5%** | **Grade A** | **Verified** |
+| `high_db_latency` | Database Query Saturation | Database Lock / IOPS | `order-service` | **95.0%** | **Grade A** | **Verified** |
+
+#### Scenario 1: `downstream_timeout` (A/B Learning Comparison)
 
 | SRE Evaluation Metric | Before Learning (Cold) | After Learning (Warm) | Learning Delta |
 | :--- | :--- | :--- | :--- |
@@ -732,6 +739,21 @@ We benchmark with known incident scenarios and ground truth to compare:
 | **Root Cause Quality** | **20.0%** | **70.0%** | **+50.0%** 🚀 |
 | **Target Service Isolated** | `payment-service` | `payment-service` | **Confirmed Accurate** |
 | **Learned Rules Applied** | `0` rules | `2` rules | **+2 rules consulted** |
+
+#### Scenario 2: `high_db_latency` (Database Query Saturation Scorecard — INC-1234)
+
+| Evaluation Dimension | Weight | Score | Result |
+| :--- | :--- | :--- | :--- |
+| **Culprit Service Accuracy** | 30% | **100%** | Accurately targeted `order-service` |
+| **Root Cause Quality** | 25% | **80%** | Identified high latency & query lock delays |
+| **Remediation Precision** | 20% | **100%** | Executed verified `reset_chaos` |
+| **Misleading Signals** | 15% | **100%** | Bypassed caller latency decoys |
+| **Evidence Grounding** | 10% | **100%** | Corroborated with real Jaeger traces & Prometheus metrics |
+| **Total Composite Score** | **100%** | **95.0%** | **Grade: A** 🌟 |
+
+**New Learned Strategy Extracted (`STRAT-20261004080826`)**:
+- **DO**: *"When diagnosing database query saturation, focus on identifying specific query patterns and their execution times, as well as any locking issues that may be contributing to latency."*
+- **AVOID**: *"Avoid attributing high latency solely to unindexed transactions without considering the impact of heavy query loads and table locks."*
 
 ### Benchmark Execution Procedure
 
@@ -743,7 +765,7 @@ python agent/benchmark.py --compare --scenario downstream_timeout
 python agent/benchmark.py --history
 ```
 
-All benchmark comparison cards are archived with full timestamps in `agent/data/benchmark_comparison.json`.
+All benchmark comparison cards and audit trails are archived with full timestamps in `agent/data/eval_benchmarks.json` and `agent/data/benchmark_comparison.json`.
 
 ### Measurements Tracked
 

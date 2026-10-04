@@ -32,5 +32,15 @@
     "anti_pattern": "Avoid assuming that high latency is solely due to the service under investigation without considering external factors or injected delays.",
     "grade_achieved": "A",
     "timestamp": "2026-10-04T06:45:17.444741+00:00"
+  },
+  {
+    "strategy_id": "STRAT-20261004080826",
+    "incident_id": "INC-1234",
+    "scenario": "Order Service Database Query Saturation",
+    "category": "database",
+    "proven_strategy": "When diagnosing database query saturation, focus on identifying specific query patterns and their execution times, as well as any locking issues that may be contributing to latency.",
+    "anti_pattern": "Avoid attributing high latency solely to unindexed transactions without considering the impact of heavy query loads and table locks.",
+    "grade_achieved": "A",
+    "timestamp": "2026-10-04T08:08:26.849463+00:00"
   }
 ]

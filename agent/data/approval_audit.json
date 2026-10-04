@@ -9,5 +9,16 @@
     "decision": "approved",
     "operator": "human_operator",
     "reason": "Standard SRE Review"
+  },
+  {
+    "audit_id": "AUDIT-20261004080823",
+    "timestamp": "2026-10-04T08:08:23.506114+00:00",
+    "incident_id": "INC-1234",
+    "action": "reset_chaos",
+    "target_service": "order-service",
+    "risk_level": "medium",
+    "decision": "approved",
+    "operator": "human_operator",
+    "reason": "Standard SRE Review"
   }
 ]

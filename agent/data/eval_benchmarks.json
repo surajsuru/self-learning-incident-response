@@ -154,5 +154,44 @@
         "has_metrics": true
       }
     }
+  },
+  {
+    "evaluation_id": "EVAL-20261004080825",
+    "timestamp": "2026-10-04T08:08:25.566498+00:00",
+    "incident_id": "INC-1234",
+    "scenario_id": "high_db_latency",
+    "scenario_name": "Order Service Database Query Saturation",
+    "grade": "A",
+    "composite_score": 95.0,
+    "breakdown": {
+      "service_accuracy": {
+        "score": 100.0,
+        "weight": "30%",
+        "expected": "order-service",
+        "diagnosed": "order-service",
+        "passed": true
+      },
+      "root_cause_accuracy": {
+        "score": 80.0,
+        "weight": "25%",
+        "reasoning": "The agent identified high latency and HTTP 500 errors as symptoms, which aligns with the ground truth. However, the agent's explanation lacks specificity regarding the simulated heavy query load and slow table locks, which are critical to understanding the root cause. The mention of unindexed database transactions is not entirely accurate in this context."
+      },
+      "remediation_precision": {
+        "score": 100.0,
+        "weight": "20%",
+        "action": "reset_chaos"
+      },
+      "misleading_signal_handling": {
+        "score": 100.0,
+        "weight": "15%",
+        "comment": "Successfully bypassed caller latency decoys and isolated the downstream culprit."
+      },
+      "evidence_grounding": {
+        "score": 100.0,
+        "weight": "10%",
+        "has_trace": true,
+        "has_metrics": true
+      }
+    }
   }
 ]
