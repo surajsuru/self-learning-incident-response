@@ -48,5 +48,15 @@
     "remediation_action": "reset_chaos",
     "target_service": "payment-service",
     "resolution_notes": "Verified: True. Confidence: 95%"
+  },
+  {
+    "incident_id": "INC-6288",
+    "timestamp": "2026-10-04T06:45:14.136274Z",
+    "alert": "Alert: High latency observed on order creation endpoints (> 3s)",
+    "symptoms": "Trace: - No traces were found for both the 'api-gateway' and 'order-service' in Jaeger, indicating a potential issue with trace collection or service availability.\n- Without trace data, it's challenging to i | Metrics: - **Container Health Status**: All containers (api-gateway, order-service, inventory-service, payment-service, notification-service) are healthy and responding as expected.\n- **Prometheus Metrics**: T",
+    "root_cause": "The high latency observed on order creation endpoints is primarily due to the payment-service, which is taking an excessive amount of time to process payment requests, thereby delaying upstream callers like order-service and api-gateway.",
+    "remediation_action": "reset_chaos",
+    "target_service": "payment-service",
+    "resolution_notes": "Verified: True. Confidence: 95%"
   }
 ]

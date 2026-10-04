@@ -22,5 +22,15 @@
     "anti_pattern": "Avoid assuming that high latency is solely due to external factors; ensure to investigate and confirm if the delay is artificially introduced.",
     "grade_achieved": "A",
     "timestamp": "2026-10-03T10:25:52.436444+00:00"
+  },
+  {
+    "strategy_id": "STRAT-20261004064517",
+    "incident_id": "INC-6288",
+    "scenario": "Payment Service Downstream Latency & Timeout",
+    "category": "latency_propagation",
+    "proven_strategy": "Always verify the nature of latency by checking for artificial delays or throttling mechanisms in the service chain to ensure accurate diagnosis.",
+    "anti_pattern": "Avoid assuming that high latency is solely due to the service under investigation without considering external factors or injected delays.",
+    "grade_achieved": "A",
+    "timestamp": "2026-10-04T06:45:17.444741+00:00"
   }
 ]

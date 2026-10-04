@@ -820,11 +820,11 @@ The project is intentionally staged. We do not build all 16 phases at once. We b
 | 9 | EvoOps Single Agent | Completed |
 | 10 | LangGraph | Completed |
 | 11 | Specialized Agents | Completed |
-| 12 | Memory | Not Started |
-| 13 | Evaluator | Not Started |
-| 14 | Self-Learning Loop | Not Started |
-| 15 | Human Approval + Remediation | Not Started |
-| 16 | Benchmark | Not Started |
+| 12 | Memory | Completed |
+| 13 | Evaluator | Completed |
+| 14 | Self-Learning Loop | Completed |
+| 15 | Human Approval + Remediation | Completed |
+| 16 | Benchmark | Next |
 
 ---
 
@@ -1169,6 +1169,6 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 12 | **Memory Architecture & Experience Retrieval** | **Completed** | Episodic memory engine (`agent/memory.py`, `agent/data/episodic_memory.json`) for historical incident lookup & automated case archival |
 | 13 | **Evaluator & Benchmarking** | **Completed** | Ground-truth scoring engine (`agent/evaluator.py`, `agent/data/eval_benchmarks.json`) grading SRE investigations across 5 dimensions |
 | 14 | **Self-Learning Loop** | **Completed** | Autonomous procedural learning engine (`agent/learning.py`, `agent/data/learned_strategies.json`) extracting strategies & anti-patterns from evaluation scorecards |
-| 15 | Human Approval + Remediation | Next | Guardrails, human-in-the-loop approvals, and automated recovery |
-| 16 | Benchmark & Verification | Not Started | Empirical evaluation: Before vs After learning comparison |
+| 15 | **Human Approval & Remediation Guardrails** | **Completed** | 3-tier risk governance (`agent/guardrails.py`, `agent/data/approval_audit.json`) with interactive operator gates & audit logging |
+| 16 | Benchmark & Verification | Next | Empirical evaluation: Before vs After learning comparison |
 

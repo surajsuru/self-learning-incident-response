@@ -1,0 +1,13 @@
+[
+  {
+    "audit_id": "AUDIT-20261004064513",
+    "timestamp": "2026-10-04T06:45:13.858889+00:00",
+    "incident_id": "INC-6288",
+    "action": "reset_chaos",
+    "target_service": "payment-service",
+    "risk_level": "medium",
+    "decision": "approved",
+    "operator": "human_operator",
+    "reason": "Standard SRE Review"
+  }
+]

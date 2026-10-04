@@ -36,12 +36,14 @@ class InvestigationState(TypedDict):
     misleading_signals: Optional[str]
     confidence_score: float  # 0.0 to 1.0
 
-    # Remediation & Recovery
+    # Remediation & Recovery (Phases 10 & 15)
     recommended_action: Optional[str]
     target_service: Optional[str]
     risk_level: str  # "low", "medium", "high"
+    approval_status: Optional[str]  # "approved", "rejected", "modified", "auto_approved"
     remediation_result: Optional[str]
     recovery_verified: bool
+
 
     # Final Output
     final_report: Optional[str]

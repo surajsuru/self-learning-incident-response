@@ -115,5 +115,44 @@
         "has_metrics": true
       }
     }
+  },
+  {
+    "evaluation_id": "EVAL-20261004064515",
+    "timestamp": "2026-10-04T06:45:15.913120+00:00",
+    "incident_id": "INC-6288",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "grade": "A",
+    "composite_score": 97.5,
+    "breakdown": {
+      "service_accuracy": {
+        "score": 100.0,
+        "weight": "30%",
+        "expected": "payment-service",
+        "diagnosed": "payment-service",
+        "passed": true
+      },
+      "root_cause_accuracy": {
+        "score": 90.0,
+        "weight": "25%",
+        "reasoning": "The agent correctly identified that the payment-service was causing high latency, which aligns with the ground truth that an artificial delay was injected. However, the agent's explanation lacks the specificity of the artificial nature of the delay, which is why it does not receive a perfect score."
+      },
+      "remediation_precision": {
+        "score": 100.0,
+        "weight": "20%",
+        "action": "reset_chaos"
+      },
+      "misleading_signal_handling": {
+        "score": 100.0,
+        "weight": "15%",
+        "comment": "Successfully bypassed caller latency decoys and isolated the downstream culprit."
+      },
+      "evidence_grounding": {
+        "score": 100.0,
+        "weight": "10%",
+        "has_trace": true,
+        "has_metrics": true
+      }
+    }
   }
 ]

@@ -38,6 +38,7 @@ from agent.memory import retrieve_similar_incidents, save_incident_to_memory
 from agent.learning import retrieve_learned_strategies
 from agent.evaluator import match_scenario_for_incident, evaluate_investigation, save_benchmark_result, display_scorecard
 from agent.learning import extract_learning_from_eval, save_learned_strategy, display_strategies
+from agent.guardrails import assess_action_risk, request_human_approval
 
 
 # Load environment
@@ -180,22 +181,49 @@ def node_diagnose_root_cause(state: InvestigationState) -> Dict[str, Any]:
 
 
 def node_execute_remediation(state: InvestigationState) -> Dict[str, Any]:
-    """Node 5: Executes remediation if authorized."""
-    if not state.get("auto_remediate"):
-        print_step("Phase 4: Remediation Skipped", "Auto-remediation is disabled. Remediation plan recommended for human approval.", "yellow")
-        return {"remediation_result": "Skipped (auto_remediate=False)"}
+    """Node 5: Enforces Human-in-the-Loop Governance & Executes Remediation."""
     action = state.get("recommended_action", "reset_chaos")
-    target = state.get("target_service", "all")
-    print_step("Phase 4: Executing Remediation", f"Executing '{action}' on '{target}'...", "magenta")
-    result = execute_remediation.invoke({"action": action, "target_service": target})
-    return {"remediation_result": result}
+    target = state.get("target_service", "payment-service")
+    
+    # 1. Assess Risk Tier
+    risk_level = assess_action_risk(action, target)
+    
+    # 2. Human-in-the-Loop Approval Gate
+    approved, decision, final_action, final_target = request_human_approval(
+        incident_id=state.get("incident_id", "INC-LIVE"),
+        action=action,
+        target_service=target,
+        root_cause=state.get("root_cause", "Unspecified"),
+        risk_level=risk_level,
+        auto_approve=state.get("auto_remediate", False)
+    )
+    
+    if not approved:
+        print_step("Phase 4: Remediation Aborted", f"Remediation was vetoed by operator. Decision: {decision}", "red")
+        return {
+            "approval_status": decision,
+            "remediation_result": f"Aborted by operator ({decision})"
+        }
+        
+    print_step("Phase 4: Executing Approved Remediation", f"Executing '{final_action}' on '{final_target}' (Decision: {decision}, Risk: {risk_level.upper()})...", "magenta")
+    result = execute_remediation.invoke({"action": final_action, "target_service": final_target})
+    return {
+        "approval_status": decision,
+        "target_service": final_target,
+        "remediation_result": result
+    }
 
 
 
 def node_verify_recovery(state: InvestigationState) -> Dict[str, Any]:
     """Node 6: Verifies cluster recovery (checks both reachability AND chaos state)."""
+    # If operator vetoed remediation, skip verification
+    if state.get("approval_status") == "rejected":
+        print_step("Phase 5: Verification Skipped", "Remediation was vetoed by operator. Cluster left in degraded state.", "yellow")
+        return {"recovery_verified": False}
+        
     print_step("Phase 5: Verifying Recovery", "Checking cluster health and active chaos status...", "yellow")
-    
+
     # 1. Check chaos status
     chaos_raw = inspect_chaos_status.invoke({})
     chaos = json.loads(chaos_raw) if isinstance(chaos_raw, str) and chaos_raw.startswith("{") else {}
@@ -348,6 +376,10 @@ def main():
     initial_state: InvestigationState = {
         "incident_id": inc_id,
         "alert_description": args.alert,
+        "target_service": None,
+        "risk_level": "medium",
+        "approval_status": None,
+        "remediation_result": None,
         "auto_remediate": args.auto_remediate,
         "current_phase": "started",
         "investigation_plan": [],
