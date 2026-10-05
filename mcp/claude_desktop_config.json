@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "evoops-sre": {
+      "command": "python",
+      "args": [
+        "c:/AI ML Engineer path/EvoOps — Self-Learning Autonomous Incident Response Platform/mcp/sre_server.py"
+      ],
+      "env": {
+        "PROMETHEUS_URL": "http://localhost:9090",
+        "JAEGER_URL": "http://localhost:16686",
+        "API_GATEWAY_URL": "http://localhost:8000"
+      }
+    }
+  }
+}

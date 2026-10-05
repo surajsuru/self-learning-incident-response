@@ -83,22 +83,28 @@ def log_step(title: str, content: str, style: str = "cyan"):
         print(f"\n--- [{title}] ---\n{content}\n")
 
 
-def run_investigation(incident_alert: str, auto_remediate: bool = False, max_steps: int = 10):
+def run_investigation(incident_alert: str, auto_remediate: bool = False, max_steps: int = 10, use_mcp: bool = False):
     print(f"\n{'='*75}")
     print(f"  EvoOps Autonomous Incident Response Agent")
     print(f"  Model: {OPENAI_MODEL_NAME} | Auto-Remediate: {auto_remediate}")
     print(f"{'='*75}\n")
     print(f"[Incident Alert Received]: {incident_alert}\n")
 
-    # Available tools
-    tools = [
-        check_cluster_health,
-        query_prometheus,
-        get_jaeger_traces,
-        inspect_chaos_status,
-        search_incident_catalog,
-        execute_remediation,
-    ]
+    # Select tool engine: MCP Server (Enterprise Standard) vs In-Process
+    if use_mcp:
+        from agent.mcp_client import load_mcp_tools
+        print("[Tool Engine]: Connecting to Model Context Protocol (MCP) Server over JSON-RPC...")
+        tools = load_mcp_tools()
+        print(f"[Tool Engine]: Loaded {len(tools)} tools via MCP Protocol.\n")
+    else:
+        tools = [
+            check_cluster_health,
+            query_prometheus,
+            get_jaeger_traces,
+            inspect_chaos_status,
+            search_incident_catalog,
+            execute_remediation,
+        ]
     tool_map = {t.name: t for t in tools}
 
     # Initialize LLM
@@ -190,9 +196,14 @@ def main():
         action="store_true",
         help="Allow the agent to autonomously execute remediation",
     )
+    parser.add_argument(
+        "--use-mcp",
+        action="store_true",
+        help="Route all tool executions through the Model Context Protocol (MCP) Server over JSON-RPC",
+    )
     args = parser.parse_args()
 
-    run_investigation(args.alert, auto_remediate=args.auto_remediate)
+    run_investigation(args.alert, auto_remediate=args.auto_remediate, use_mcp=args.use_mcp)
 
 
 if __name__ == "__main__":
