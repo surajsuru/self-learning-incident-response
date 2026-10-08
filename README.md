@@ -890,8 +890,8 @@ The project is intentionally staged. We do not build all 20 phases at once. We b
 | 15 | Human Approval + Remediation | Completed |
 | 16 | Benchmark | Completed |
 | 17 | Model Context Protocol (MCP) SRE Server | Completed |
-| 18 | LLMOps Cost & Token Telemetry | In Progress |
-| 19 | CI/CD Benchmark Regression Gate | Planned |
+| 18 | LLMOps Cost & Token Telemetry | Completed |
+| 19 | CI/CD Benchmark Regression Gate | In Progress |
 | 20 | Containerized Production Deployment | Planned |
 
 ---
@@ -1259,7 +1259,7 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 15 | **Human Approval & Remediation Guardrails** | **Completed** | 3-tier risk governance (`agent/guardrails.py`, `agent/data/approval_audit.json`) with interactive operator gates & audit logging |
 | 16 | **Benchmark & Verification** | **Completed** | Empirical A/B test suite (`agent/benchmark.py`, `agent/data/benchmark_comparison.json`) proving +12.5% score & +50% root cause improvement |
 | 17 | **Model Context Protocol (MCP) SRE Server** | **Completed** | Standardized JSON-RPC SRE tool server (`mcp/sre_server.py`) and agent adapter (`agent/mcp_client.py`) enabling any MCP client (Claude Desktop, Cursor) or autonomous agent (`--use-mcp`) to inspect & remediate cluster incidents |
-| 18 | **LLMOps Cost & Token Telemetry** | **In Progress** | Operational LLM telemetry tracking token consumption, latency, and USD cost attribution per incident investigation |
-| 19 | **CI/CD Benchmark Regression Gate** | **Planned** | Automated GitHub Actions CI workflow running empirical benchmarks on PRs to prevent diagnostic regression below Grade A (90%) |
+| 18 | **LLMOps Cost & Token Telemetry** | **Completed** | Operational LLM telemetry tracking token consumption, latency, prompt audit logs, and USD cost attribution per incident investigation (`agent/llm_metrics.py`, `agent/data/llm_telemetry.json`) |
+| 19 | **CI/CD Benchmark Regression Gate** | **In Progress** | Automated GitHub Actions CI workflow running empirical benchmarks on PRs to prevent diagnostic regression below Grade A (90%) |
 | 20 | **Containerized Production Deployment** | **Planned** | Full container packaging of agent runtime and MCP server in Docker Compose for production parity and air-gapped deployment |
 

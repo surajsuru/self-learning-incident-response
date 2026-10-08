@@ -1,0 +1,206 @@
+[
+  {
+    "run_id": "RUN-20261006163024",
+    "timestamp": "2026-10-06T16:30:24.612613+00:00",
+    "incident_id": "TEST-INC-1234",
+    "model_name": "gpt-4o-mini",
+    "metrics": {
+      "prompt_tokens": 2100,
+      "completion_tokens": 350,
+      "total_tokens": 2450,
+      "llm_calls": 2,
+      "duration_seconds": 0.0,
+      "throughput_tokens_per_sec": 0.0,
+      "total_cost_usd": 0.000525
+    },
+    "request_trace": [
+      {
+        "step": 1,
+        "type": "llm_request",
+        "timestamp": "2026-10-06T16:30:24.612527+00:00",
+        "prompt_preview": "System: You are an SRE... Human: Alert: High latency on payment service"
+      },
+      {
+        "step": 2,
+        "type": "llm_response",
+        "timestamp": "2026-10-06T16:30:24.612576+00:00",
+        "tokens": {
+          "prompt": 2100,
+          "completion": 350,
+          "total": 2450
+        },
+        "response_preview": "Identified timeout at payment-service"
+      }
+    ]
+  },
+  {
+    "run_id": "RUN-20261008143037",
+    "timestamp": "2026-10-08T14:30:37.075965+00:00",
+    "incident_id": "INC-9806",
+    "model_name": "gpt-4o-mini",
+    "metrics": {
+      "prompt_tokens": 12498,
+      "completion_tokens": 718,
+      "total_tokens": 13216,
+      "llm_calls": 9,
+      "duration_seconds": 30.57,
+      "throughput_tokens_per_sec": 23.5,
+      "total_cost_usd": 0.002305
+    },
+    "request_trace": [
+      {
+        "step": 1,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:10.229764+00:00",
+        "prompt_preview": "system: You are EvoOps, a Senior Autonomous Site Reliability Engineer (SRE) and Incident | human: Alert: High latency observed on order creation endpoints\n[Notice]: Auto-remediat"
+      },
+      {
+        "step": 2,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:13.739672+00:00",
+        "tokens": {
+          "prompt": 825,
+          "completion": 107,
+          "total": 932
+        },
+        "response_preview": ""
+      },
+      {
+        "step": 3,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:14.926275+00:00",
+        "prompt_preview": "tool: {\n  \"api-gateway\": {\n    \"status\": \"healthy\",\n    \"details\": {\n      \"service\":  | tool: Query succeeded but returned no metrics (empty result). | tool: Query succeeded but returned no metrics (empty result)."
+      },
+      {
+        "step": 4,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:16.730729+00:00",
+        "tokens": {
+          "prompt": 1122,
+          "completion": 23,
+          "total": 1145
+        },
+        "response_preview": ""
+      },
+      {
+        "step": 5,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:16.922676+00:00",
+        "prompt_preview": "tool: Query succeeded but returned no metrics (empty result). | ai:  | tool: No traces found for service 'order-service' in Jaeger."
+      },
+      {
+        "step": 6,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:18.698590+00:00",
+        "tokens": {
+          "prompt": 1170,
+          "completion": 23,
+          "total": 1193
+        },
+        "response_preview": ""
+      },
+      {
+        "step": 7,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:18.778619+00:00",
+        "prompt_preview": "tool: No traces found for service 'order-service' in Jaeger. | ai:  | tool: []"
+      },
+      {
+        "step": 8,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:19.974641+00:00",
+        "tokens": {
+          "prompt": 1206,
+          "completion": 23,
+          "total": 1229
+        },
+        "response_preview": ""
+      },
+      {
+        "step": 9,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:20.026092+00:00",
+        "prompt_preview": "tool: [] | ai:  | tool: No traces found for service 'inventory-service' in Jaeger."
+      },
+      {
+        "step": 10,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:21.929768+00:00",
+        "tokens": {
+          "prompt": 1254,
+          "completion": 35,
+          "total": 1289
+        },
+        "response_preview": ""
+      },
+      {
+        "step": 11,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:22.044077+00:00",
+        "prompt_preview": "tool: No traces found for service 'inventory-service' in Jaeger. | ai:  | tool: Query succeeded but returned no metrics (empty result)."
+      },
+      {
+        "step": 12,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:23.317982+00:00",
+        "tokens": {
+          "prompt": 1308,
+          "completion": 35,
+          "total": 1343
+        },
+        "response_preview": ""
+      },
+      {
+        "step": 13,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:23.394618+00:00",
+        "prompt_preview": "tool: Query succeeded but returned no metrics (empty result). | ai:  | tool: Query succeeded but returned no metrics (empty result)."
+      },
+      {
+        "step": 14,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:25.155366+00:00",
+        "tokens": {
+          "prompt": 1362,
+          "completion": 13,
+          "total": 1375
+        },
+        "response_preview": ""
+      },
+      {
+        "step": 15,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:25.380916+00:00",
+        "prompt_preview": "tool: Query succeeded but returned no metrics (empty result). | ai:  | tool: {\n  \"api-gateway\": {\n    \"latency_seconds\": 0.0,\n    \"error_rate\": 0.0,\n    \"err"
+      },
+      {
+        "step": 16,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:26.485576+00:00",
+        "tokens": {
+          "prompt": 1604,
+          "completion": 17,
+          "total": 1621
+        },
+        "response_preview": ""
+      },
+      {
+        "step": 17,
+        "type": "llm_request",
+        "timestamp": "2026-10-08T14:30:26.545344+00:00",
+        "prompt_preview": "tool: {\n  \"api-gateway\": {\n    \"latency_seconds\": 0.0,\n    \"error_rate\": 0.0,\n    \"err | ai:  | tool: [\n  {\n    \"id\": \"downstream_timeout\",\n    \"name\": \"Payment Service Downstream La"
+      },
+      {
+        "step": 18,
+        "type": "llm_response",
+        "timestamp": "2026-10-08T14:30:37.045758+00:00",
+        "tokens": {
+          "prompt": 2647,
+          "completion": 442,
+          "total": 3089
+        },
+        "response_preview": "### Incident Summary\nHigh latency was observed on order creation endpoints, prompting an investigation into the underlying causes.\n\n### Evidence & Timeline\n1. **Cluster Health Check**: All microservices (api-gateway, order-service, inventory-service,..."
+      }
+    ]
+  }
+]

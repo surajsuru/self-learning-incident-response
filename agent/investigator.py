@@ -8,11 +8,15 @@ Usage:
 import os
 import sys
 import argparse
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 
+
 # Add project root to sys.path so 'agent.tools' is always found
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from agent.llm_metrics import LLMTelemetryTracker, LLMOpsCallbackHandler
 
 # Rich terminal styling (with standard fallback)
 try:
@@ -90,6 +94,14 @@ def run_investigation(incident_alert: str, auto_remediate: bool = False, max_ste
     print(f"{'='*75}\n")
     print(f"[Incident Alert Received]: {incident_alert}\n")
 
+    # Initialize LLMOps Telemetry Tracker
+    telemetry_tracker = LLMTelemetryTracker(
+        incident_id="INC-" + str(int(time.time()))[-4:],
+        model_name=OPENAI_MODEL_NAME
+    )
+    llm_callback = LLMOpsCallbackHandler(telemetry_tracker)
+
+
     # Select tool engine: MCP Server (Enterprise Standard) vs In-Process
     if use_mcp:
         from agent.mcp_client import load_mcp_tools
@@ -112,6 +124,7 @@ def run_investigation(incident_alert: str, auto_remediate: bool = False, max_ste
         "model": OPENAI_MODEL_NAME,
         "temperature": 0.0,
         "api_key": OPENAI_API_KEY,
+        "callbacks": [llm_callback]
     }
     if OPENAI_API_BASE:
         llm_kwargs["base_url"] = OPENAI_API_BASE
@@ -181,6 +194,10 @@ def run_investigation(incident_alert: str, auto_remediate: bool = False, max_ste
                     name=tool_name,
                 )
             )
+    # Finalize LLMOps Telemetry & Print Scorecard
+    telemetry_tracker.finalize()
+    telemetry_tracker.print_summary()
+
 
 
 def main():
