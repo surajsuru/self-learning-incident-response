@@ -26,6 +26,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r agent/requirements.txt
 
+      - name: Start Microservices & Observability Mesh
+        run: |
+          docker compose up -d postgres redis rabbitmq jaeger prometheus api-gateway order-service inventory-service payment-service notification-service
+          echo "Waiting 15 seconds for services and Prometheus to initialize..."
+          sleep 15
+          docker compose ps
+
+      
       - name: Run CI/CD Benchmark Regression Gate
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -34,3 +42,8 @@ jobs:
           JAEGER_URL: "http://localhost:16686"
         run: |
           python agent/ci_regression_test.py --min-score 90.0
+
+      - name: Teardown Services
+        if: always()
+        run: |
+          docker compose down -v
