@@ -182,6 +182,34 @@ services:
       - prometheus
       - jaeger
 
+  
+  evoops-agent:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    container_name: evo-agent
+    environment:
+      - PROMETHEUS_URL=http://prometheus:9090
+      - JAEGER_URL=http://jaeger:16686
+      - API_GATEWAY_URL=http://api-gateway:8000
+      - ORDER_SERVICE_URL=http://order-service:8001
+      - PAYMENT_SERVICE_URL=http://payment-service:8003
+      - INVENTORY_SERVICE_URL=http://inventory-service:8002
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8004
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL_NAME=gpt-4o-mini
+    depends_on:
+      - prometheus
+      - jaeger
+      - api-gateway
+      - order-service
+      - payment-service
+    networks:
+      - evonet
+    profiles:
+      - agent # Optional profile so it can be run on demand with --profile agent
+
+
 
 volumes:
   postgres_data:
