@@ -1,0 +1,36 @@
+name: EvoOps SRE Benchmark Regression Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  eval-benchmark-gate:
+    name: Evaluate Agent Incident Diagnosis (Grade A Gate)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r agent/requirements.txt
+
+      - name: Run CI/CD Benchmark Regression Gate
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL_NAME: "gpt-4o-mini"
+          PROMETHEUS_URL: "http://localhost:9090"
+          JAEGER_URL: "http://localhost:16686"
+        run: |
+          python agent/ci_regression_test.py --min-score 90.0

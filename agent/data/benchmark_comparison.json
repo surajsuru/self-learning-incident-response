@@ -44,5 +44,74 @@
       "duration": 7.78
     },
     "score_improvement": 12.5
+  },
+  {
+    "benchmark_id": "BENCH-COMP-20261008151016",
+    "timestamp": "2026-10-08T15:10:16.063465+00:00",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "before_learning": {
+      "composite_score": 55.5,
+      "grade": "F",
+      "service_diagnosed": "order-service",
+      "root_cause_score": 90.0,
+      "rules_used": 0,
+      "duration": 12.86
+    },
+    "after_learning": {
+      "composite_score": 50.5,
+      "grade": "F",
+      "service_diagnosed": "order-service",
+      "root_cause_score": 70.0,
+      "rules_used": 2,
+      "duration": 9.71
+    },
+    "score_improvement": -5.0
+  },
+  {
+    "benchmark_id": "BENCH-COMP-20261008151600",
+    "timestamp": "2026-10-08T15:16:00.075707+00:00",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "before_learning": {
+      "composite_score": 92.5,
+      "grade": "A",
+      "service_diagnosed": "payment-service",
+      "root_cause_score": 70.0,
+      "rules_used": 0,
+      "duration": 9.97
+    },
+    "after_learning": {
+      "composite_score": 92.5,
+      "grade": "A",
+      "service_diagnosed": "payment-service",
+      "root_cause_score": 70.0,
+      "rules_used": 2,
+      "duration": 10.37
+    },
+    "score_improvement": 0.0
+  },
+  {
+    "benchmark_id": "BENCH-COMP-20261008154239",
+    "timestamp": "2026-10-08T15:42:39.004567+00:00",
+    "scenario_id": "downstream_timeout",
+    "scenario_name": "Payment Service Downstream Latency & Timeout",
+    "before_learning": {
+      "composite_score": 95.0,
+      "grade": "A",
+      "service_diagnosed": "payment-service",
+      "root_cause_score": 80.0,
+      "rules_used": 0,
+      "duration": 12.53
+    },
+    "after_learning": {
+      "composite_score": 92.5,
+      "grade": "A",
+      "service_diagnosed": "payment-service",
+      "root_cause_score": 70.0,
+      "rules_used": 2,
+      "duration": 8.95
+    },
+    "score_improvement": -2.5
   }
 ]

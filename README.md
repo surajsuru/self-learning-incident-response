@@ -891,8 +891,8 @@ The project is intentionally staged. We do not build all 20 phases at once. We b
 | 16 | Benchmark | Completed |
 | 17 | Model Context Protocol (MCP) SRE Server | Completed |
 | 18 | LLMOps Cost & Token Telemetry | Completed |
-| 19 | CI/CD Benchmark Regression Gate | In Progress |
-| 20 | Containerized Production Deployment | Planned |
+| 19 | CI/CD Benchmark Regression Gate | Completed |
+| 20 | Containerized Production Deployment | In Progress |
 
 ---
 
@@ -1260,6 +1260,6 @@ The objective is not to generate a magical demo. The objective is to build a ser
 | 16 | **Benchmark & Verification** | **Completed** | Empirical A/B test suite (`agent/benchmark.py`, `agent/data/benchmark_comparison.json`) proving +12.5% score & +50% root cause improvement |
 | 17 | **Model Context Protocol (MCP) SRE Server** | **Completed** | Standardized JSON-RPC SRE tool server (`mcp/sre_server.py`) and agent adapter (`agent/mcp_client.py`) enabling any MCP client (Claude Desktop, Cursor) or autonomous agent (`--use-mcp`) to inspect & remediate cluster incidents |
 | 18 | **LLMOps Cost & Token Telemetry** | **Completed** | Operational LLM telemetry tracking token consumption, latency, prompt audit logs, and USD cost attribution per incident investigation (`agent/llm_metrics.py`, `agent/data/llm_telemetry.json`) |
-| 19 | **CI/CD Benchmark Regression Gate** | **In Progress** | Automated GitHub Actions CI workflow running empirical benchmarks on PRs to prevent diagnostic regression below Grade A (90%) |
-| 20 | **Containerized Production Deployment** | **Planned** | Full container packaging of agent runtime and MCP server in Docker Compose for production parity and air-gapped deployment |
+| 19 | **CI/CD Benchmark Regression Gate** | **Completed** | Automated GitHub Actions CI workflow (`.github/workflows/eval_benchmark.yml`, `agent/ci_regression_test.py`) with self-contained setup/teardown fixtures enforcing Grade A (>= 90%) merge gates |
+| 20 | **Containerized Production Deployment** | **In Progress** | Full container packaging of agent runtime and MCP server in Docker Compose for production parity and air-gapped deployment |
 

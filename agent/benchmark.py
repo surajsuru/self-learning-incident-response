@@ -189,6 +189,7 @@ def run_comparison(scenario_id: str = "downstream_timeout"):
     save_benchmark_comparison(comparison_card)
     # Display Side-by-Side Scorecard
     display_comparison_table(comparison_card)
+    return comparison_card
 
 
 
